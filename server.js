@@ -15,7 +15,7 @@ function buildGame() {
 	const template = fs.readFileSync("template.html", "utf-8");
 	let code = "";
 
-	code += `<script src="/dist/game.js"></script>\n`;
+	code += `<script src="/game.js"></script>\n`;
 
 	try {
 		// build user code
@@ -67,8 +67,6 @@ app.get("/", (req, res) => {
 	res.sendFile(__dirname + "/dist/index.html");
 });
 
-app.use("/sprites", express.static("sprites"));
-app.use("/sounds", express.static("sounds"));
-app.use("/dist", express.static("dist"));
+app.use(express.static("dist"));
 
 server.listen(port);

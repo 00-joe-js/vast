@@ -12,8 +12,8 @@ import loadLevel3 from "./levels/level3";
 import loadLevel4 from "./levels/level4";
 const LEVEL_CONFIG = [
     loadLevel1,
-    // loadLevel2, 
-    // loadLevel3,
+    loadLevel2,
+    loadLevel3,
     loadLevel4
 ];
 
@@ -102,8 +102,8 @@ ready(() => {
 
     if (PLAY_MUSIC) {
         setTimeout(() => {
-            play("dangerouspath", { volume: 0.2, loop: true });
-        }, 2000);
+            play("dangerouspath", { volume: 0.4, loop: true });
+        }, 1000);
     }
 
     lvlManager.loadNextLevel();
@@ -124,7 +124,7 @@ ready(() => {
         if (player.isTouching(door)) {
 
             setCrouching(true);
-            play("door", { volume: 0.05 });
+            // play("door", { volume: 0.05 });
             fade(() => {
                 lvlManager.loadNextLevel();
             });
