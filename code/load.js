@@ -21,6 +21,10 @@ export default () => {
         crouch: {
           from: (9 * 14) + 1,
           to: (9 * 14) + 5
+        },
+        float: {
+          from: (12 * 14) + 1,
+          to: (12 * 14) + 3
         }
       }
     });
@@ -39,5 +43,12 @@ export default () => {
     // BG MUSIC
     // Thanks: https://joshuuu.itch.io/short-loopable-background-music
     loadSound("dangerouspath", "sounds/Dangerous Path.wav");
+
+    loadSound("computeOpen", "sounds/compute.wav");
+    loadSound("computeError", "sounds/error.wav");
+    loadSound("computeExecute", "sounds/execute.wav");
+    loadSound("reset", "sounds/reset.wav");
+    loadSound("jumpSound", "sounds/jump.wav");
+    loadSound("door", "sounds/gothrough.wav");
   
   };

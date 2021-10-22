@@ -1,4 +1,5 @@
 import buildPuter from "../puters";
+import createResetPuter from "../puters/reset";
 
 export default (player) => {
 
@@ -32,8 +33,8 @@ export default (player) => {
             }
         ]);
         action(() => {
-            plat.moveTo(vec2(x, -10), plat.speed);
-            if (plat.pos.y < 0) {
+            plat.moveTo(vec2(x, -40), plat.speed);
+            if (plat.pos.y < -30) {
                 plat.moveTo(x, height());
             }
         });
@@ -86,25 +87,16 @@ export default (player) => {
         }
     );
 
-    const resetPuter = add([
-        color(0, 255, 255),
-        pos(cellWidth * 0, cellHeight * 5.5),
-        sprite("puterIdle"),
-        scale(2),
-        area({ scale: { x: 2, y: 1 } }),
-        origin("left"),
-        "computer"
-    ]);
-    player.on("computing", (computer) => {
-        if (computer !== resetPuter) return;
-        lastTyped = "";
-        setTimeout(() => {
+    const cleanupResetPuter = createResetPuter(
+        [cellWidth * 0, cellHeight * 5.5],
+        player,
+        () => {
+            lastTyped = "";
             railedPlats.forEach((plat, i) => {
                 plat.speed = getDefaultPlatSpeed(i);
             });
-            player.trigger("doneComputing");
-        }, 1000);
-    });
+        }
+    );
 
     const initialJumpForce = player.jumpForce;
     action(() => {
@@ -168,7 +160,7 @@ export default (player) => {
     return () => {
         destroy(level);
         cleanupPuter();
-        destroy(resetPuter);
+        cleanupResetPuter();
         railedPlats.forEach(destroy);
         rails.forEach(destroy);
     };

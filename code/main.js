@@ -11,9 +11,9 @@ import loadLevel2 from "./levels/level2";
 import loadLevel3 from "./levels/level3";
 import loadLevel4 from "./levels/level4";
 const LEVEL_CONFIG = [
-    loadLevel1, 
-    loadLevel2, 
-    loadLevel3,
+    loadLevel1,
+    // loadLevel2, 
+    // loadLevel3,
     loadLevel4
 ];
 
@@ -29,17 +29,20 @@ kaboom({
 import load from "./load";
 load();
 
+const bodyConfig = { weight: 1, jumpForce: 750, maxVel: 65536 };
+
 const player = add([
     sprite("player"),
     pos(),
     origin("bot"),
     area({ width: 30, height: 40 }),
-    body({ weight: 1, jumpForce: 750 }),
+    body(bodyConfig),
     {
         speed: 250,
         jumpHeight: 750,
         fastfalling: false,
-        crouched: false
+        crouched: false,
+        bodyOpts: bodyConfig,
     },
     color(),
     z(1000),
@@ -48,11 +51,12 @@ const player = add([
 ]);
 
 const playerAnim = (anim) => {
-    if (!player.grounded()) return;
     if (player.curAnim() !== anim) {
         player.play(anim, { loop: true });
     }
 };
+
+player.setAnim = playerAnim;
 
 const spawnPlayer = () => {
     setCrouching(true);
@@ -108,16 +112,19 @@ ready(() => {
     playerAnim("idle");
 
     keyPress("space", () => {
-        if (player.grounded()) {
+        if (player.grounded() && !player.crouching) {
             player.jump();
             player.play("jump");
+            play("jumpSound", { volume: 0.15 })
         }
     });
 
     keyPress(["w", "e"], () => {
         const door = get("goal")[0];
         if (player.isTouching(door)) {
+
             setCrouching(true);
+            play("door", { volume: 0.05 });
             fade(() => {
                 lvlManager.loadNextLevel();
             });
@@ -153,7 +160,7 @@ ready(() => {
 
     player.action(() => {
 
-        if (player.pos.y > 2000 || player.pos.y < 0) {
+        if (player.pos.y > 2000 || player.pos.y < -5) {
             spawnPlayer();
         }
 
