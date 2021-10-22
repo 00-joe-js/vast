@@ -11,7 +11,7 @@ export default (player) => {
 
     const platformRailXValues = [300, 600, 900];
 
-    platformRailXValues.forEach((x) => {
+    const rails = platformRailXValues.map((x) => {
         return add([
             rect(2, 10000),
             pos(x, 0)
@@ -163,6 +163,14 @@ export default (player) => {
         "                    "
     ];
 
-    return addLevel(levelMapString, levelConfig);
+    const level = addLevel(levelMapString, levelConfig);
+
+    return () => {
+        destroy(level);
+        cleanupPuter();
+        destroy(resetPuter);
+        railedPlats.forEach(destroy);
+        rails.forEach(destroy);
+    };
 
 };

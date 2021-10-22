@@ -1,1 +1,3 @@
 node_modules
+dist/game.js
+dist/game.js.map

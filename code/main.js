@@ -9,10 +9,12 @@ const PLAY_MUSIC = true;
 import loadLevel1 from "./levels/level1";
 import loadLevel2 from "./levels/level2";
 import loadLevel3 from "./levels/level3";
+import loadLevel4 from "./levels/level4";
 const LEVEL_CONFIG = [
     loadLevel1, 
     loadLevel2, 
-    loadLevel3
+    loadLevel3,
+    loadLevel4
 ];
 
 import kaboom from "kaboom";
