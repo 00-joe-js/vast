@@ -155,6 +155,7 @@ export default (player) => {
 
     return () => {
         destroy(level);
+        destroy(strip);
         cleanupResetPuter();
         cleanupPuter();
     };

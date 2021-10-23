@@ -1,6 +1,6 @@
 import { activateEditorAndSetContent } from "../misc/editorUtils";
 
-const buildPuter = ({ getCodeBlock, onExecute, player }, { puterPos, areaScaleX = 3, codeWindowPos, orig = "left" }) => {
+const buildPuter = ({ getCodeBlock, onExecute, player }, { puterPos, areaScaleX = 3, codeWindowPos, orig = "left", autoOpen = false, errorTextScale = 1 }) => {
 
     const puter = add([
         pos(...puterPos),
@@ -21,11 +21,12 @@ const buildPuter = ({ getCodeBlock, onExecute, player }, { puterPos, areaScaleX 
             text(err.message, { font: "sink", size: 16 }),
             pos(),
             follow(puter, vec2(0, -50)),
-            lifespan(5, { fade: 0.8 })
+            lifespan(5, { fade: 0.8 }),
+            scale(errorTextScale)
         ]);
     });
 
-    const cancelComputingListener = player.on("computing", (computer) => {
+    const open = (computer) => {
 
         if (computer !== puter) return;
 
@@ -44,7 +45,13 @@ const buildPuter = ({ getCodeBlock, onExecute, player }, { puterPos, areaScaleX 
 
         const { deactivate } = activateEditorAndSetContent(getCodeBlock(), execute, codeWindowPos);
 
-    });
+    };
+
+    const cancelComputingListener = player.on("computing", open);
+
+    if (autoOpen) {
+        open(puter);
+    }
 
     return () => {
         cancelComputingListener();

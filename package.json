@@ -3,6 +3,7 @@
     "esbuild": "^0.13.8",
     "express": "^4.17.1",
     "highlight.js": "^11.3.1",
-    "kaboom": "^2000.0.0"
+    "kaboom": "^2000.0.0",
+    "shuffle-array": "^1.0.1"
   }
 }

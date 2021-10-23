@@ -10,11 +10,13 @@ import loadLevel1 from "./levels/level1";
 import loadLevel2 from "./levels/level2";
 import loadLevel3 from "./levels/level3";
 import loadLevel4 from "./levels/level4";
+import loadLevel5 from "./levels/level5";
 const LEVEL_CONFIG = [
     loadLevel1,
     loadLevel2,
     loadLevel3,
-    loadLevel4
+    loadLevel4,
+    loadLevel5,
 ];
 
 import kaboom from "kaboom";
