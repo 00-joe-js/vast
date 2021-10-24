@@ -49,7 +49,7 @@ export default (player) => {
             z(2)
         ]),
     ];
-    action(() => {
+    upStrip.action(() => {
         upStrip.opacity = wave(0.4, 1, time() * 25);
     });
 
@@ -59,7 +59,7 @@ export default (player) => {
 
     const defaultVelocity = player.bodyOpts.maxVel;
     let alreadyTouching = false;
-    action(() => {
+    upStrip.action(() => {
         if (playerTravelTo) return;
         const isTouching = upStrip.isTouching(player);
         if (isTouching) {
@@ -108,7 +108,7 @@ export default (player) => {
         ]);
     });
 
-    action(() => {
+    upStrip.action(() => {
         const t = time();
         upStrip.opacity = wave(0.4, 1, t * 25);
         portals.forEach((p, i) => {
@@ -127,7 +127,7 @@ export default (player) => {
         });
     });
 
-    player.action(() => {
+    upStrip.action(() => {
         if (playerTravelTo) {
             player.moveTo(playerTravelTo, 1500);
             if (player.pos.x === playerTravelTo.x && player.pos.y === playerTravelTo.y) {
@@ -277,7 +277,14 @@ export default (player) => {
     const level = addLevel(levelMapString, levelConfig);
 
     return () => {
+        destroy(level);
         destroy(floor);
+        cleanupThrustPuter();
+        cleanupResetPuter();
+        cleanUpPortalPuter();
+        portals.forEach(destroy);
+        destroy(upStrip);
+        walls.forEach(destroy);
     };
 
 };

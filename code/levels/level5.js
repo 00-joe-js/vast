@@ -135,6 +135,7 @@ export default (player) => {
     );
 
     return () => {
+        destroy(floor);
         firstRow.forEach(destroy);
         grid.forEach(destroy);
         cleanupPuter();

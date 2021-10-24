@@ -55,11 +55,11 @@ const recreateCaretPosition = (preEle, caretPosition, selection, clonedRange) =>
     }
     try {
         clonedRange.setStart(elementAtCaret, offset);
-    } catch(e) {
+    } catch (e) {
         console.error(e);
         console.log(elementAtCaret);
     }
-    
+
     selection.addRange(clonedRange);
 };
 
@@ -108,15 +108,19 @@ export const activateEditorAndSetContent = (block, onSubmit, pos = [0, 0]) => {
     window.addEventListener("resize", positionBlock);
 
     lines.forEach(pre => codeContainer.appendChild(pre));
+
+    let onInput;
+    let onKeyPress;
+
     editablePre.focus();
 
-    const onInput = (e) => {
+    onInput = (e) => {
         const { caretPosition, selection, clonedRange } = getCaretPosition(editablePre);
         editablePre.innerHTML = highlight(editablePre.innerText);
         recreateCaretPosition(editablePre, caretPosition, selection, clonedRange);
     };
 
-    const onKeyPress = (e) => {
+    onKeyPress = (e) => {
         if (e.code === "Enter") {
             if (e.ctrlKey) {
                 const { caretPosition, selection, clonedRange } = getCaretPosition(editablePre);
@@ -129,14 +133,14 @@ export const activateEditorAndSetContent = (block, onSubmit, pos = [0, 0]) => {
                 onSubmit(editablePre.innerText);
             }
         }
-    };
+    }
 
     editablePre.addEventListener("input", onInput);
     editablePre.addEventListener("keypress", onKeyPress);
 
     const { caretPosition, selection, clonedRange } = getCaretPosition(editablePre);
 
-        recreateCaretPosition(editablePre, editablePre.textContent.length, selection, clonedRange);
+    recreateCaretPosition(editablePre, editablePre.textContent.length, selection, clonedRange);
 
     const deactivate = () => {
         window.removeEventListener("resize", positionBlock);
@@ -149,6 +153,35 @@ export const activateEditorAndSetContent = (block, onSubmit, pos = [0, 0]) => {
 
     return {
         deactivate
+    };
+
+};
+
+export const showDialogWindow = (initContent, initPos) => {
+
+    const newContainer = document.createElement("pre");
+    newContainer.classList.add("dialog");
+    newContainer.style.display = "block";
+
+    const setContent = (newContent) => {
+        if (Array.isArray(newContent)) newContent = newContent.join("\n");
+        newContainer.innerText = newContent;
+    };
+    setContent(initContent);
+
+    const setPos = (pos) => {
+        newContainer.style.left = (canvas.offsetLeft + pos[0]) + "px";
+        newContainer.style.top = (canvas.offsetTop + pos[1]) + "px";
+    };
+    setPos(initPos);
+
+    play("computeOpen", { volume: 0.1 });
+    document.body.appendChild(newContainer);
+
+    return {
+        destroy: () => newContainer.remove(),
+        setPos,
+        setContent
     };
 
 };
