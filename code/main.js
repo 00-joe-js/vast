@@ -22,193 +22,210 @@ const LEVEL_CONFIG = [
 ];
 
 import kaboom from "kaboom";
-// initialize context
-kaboom({
-    debug: true,
-    background: [20, 20, 20],
-    width: 1200,
-    height: 720
-});
-
 import load from "./load";
-load();
 
-const bodyConfig = { weight: 1, jumpForce: 750, maxVel: 65536 };
 
-const player = add([
-    sprite("player"),
-    pos(),
-    origin("bot"),
-    area({ width: 30, height: 40 }),
-    body(bodyConfig),
-    {
-        speed: 250,
-        jumpHeight: 750,
-        fastfalling: false,
-        crouched: false,
-        bodyOpts: bodyConfig,
-    },
-    color(),
-    z(1000),
-    opacity(1),
-    "player"
-]);
+const startGame = () => {
+    document.querySelector("#title-card").remove();
+    // initialize context
+    kaboom({
+        debug: true,
+        background: [20, 20, 20],
+        width: 1200,
+        height: 720
+    });
 
-const playerAnim = (anim) => {
-    if (player.curAnim() !== anim) {
-        player.play(anim, { loop: true });
-    }
-};
+    load();
 
-player.setAnim = playerAnim;
+    const bodyConfig = { weight: 1, jumpForce: 750, maxVel: 65536 };
 
-const spawnPlayer = () => {
-    setCrouching(true);
-    player.opacity = 1;
-    player.moveTo(player.spawnPoint);
-    setTimeout(() => {
-        setCrouching(false);
-    }, 750);
-};
+    const player = add([
+        sprite("player"),
+        pos(),
+        origin("bot"),
+        area({ width: 30, height: 40 }),
+        body(bodyConfig),
+        {
+            speed: 250,
+            jumpHeight: 750,
+            fastfalling: false,
+            crouched: false,
+            bodyOpts: bodyConfig,
+        },
+        color(),
+        z(1000),
+        opacity(1),
+        "player"
+    ]);
 
-const setCrouching = (bool) => {
-    player.crouching = bool;
-};
-
-const fade = (done) => {
-    const i = setInterval(() => {
-        player.opacity = player.opacity - 0.1;
-        if (player.opacity <= 0) {
-            clearInterval(i);
-            done();
+    const playerAnim = (anim) => {
+        if (player.curAnim() !== anim) {
+            player.play(anim, { loop: true });
         }
-    }, 100);
-};
-
-class LevelManager {
-    constructor(loadLevelFns, player) {
-        this.loadFns = loadLevelFns;
-        this.player = player;
-        this.unloadCurrentLevel = null;
-    }
-    loadNextLevel() {
-        if (this.unloadCurrentLevel) {
-            this.unloadCurrentLevel();
-        }
-        this.unloadCurrentLevel = this.loadFns.shift()(this.player);
-        spawnPlayer();
-    }
-}
-
-const lvlManager = new LevelManager(LEVEL_CONFIG, player);
-
-ready(() => {
-
-    if (PLAY_MUSIC) {
-        setTimeout(() => {
-            play("dangerouspath", { volume: 0.3, loop: true });
-        }, 1000);
-    }
-
-    lvlManager.loadNextLevel();
-    spawnPlayer();
-
-    playerAnim("idle");
-
-    keyPress("space", () => {
-        if (player.grounded() && !player.crouching) {
-            player.jump();
-            player.play("jump");
-            play("jumpSound", { volume: 0.15 })
-        }
-    });
-
-    keyPress(["w", "e"], () => {
-        const door = get("goal")[0];
-        if (player.isTouching(door)) {
-
-            setCrouching(true);
-            // play("door", { volume: 0.05 });
-            fade(() => {
-                lvlManager.loadNextLevel();
-            });
-        }
-    });
-
-    keyPress(["e", "enter"], () => {
-        const computers = get("computer");
-        if (computers.length === 0) return;
-        computers.forEach((computer) => {
-            if (player.isTouching(computer)) {
-                player.trigger("computing", computer);
-            }
-        });
-    });
-
-    player.on("computing", () => {
-        setCrouching(true);
-    });
-    player.on("doneComputing", () => {
-        focus();
-        setTimeout(() => setCrouching(false), 100);
-    });
-
-    let timeRunning = 0;
-
-    const getMoveSpeed = (isGrounded) => {
-        const additionalSpeed = Math.min(timeRunning, 1) * 100;
-        const speed = player.speed + additionalSpeed;
-        if (!isGrounded) return speed * 0.75;
-        return speed;
     };
 
-    player.action(() => {
+    player.setAnim = playerAnim;
 
-        if (player.pos.y > 2000 || player.pos.y < -5) {
+    const spawnPlayer = () => {
+        setCrouching(true);
+        player.opacity = 1;
+        player.moveTo(player.spawnPoint);
+        setTimeout(() => {
+            setCrouching(false);
+        }, 750);
+    };
+
+    const setCrouching = (bool) => {
+        player.crouching = bool;
+    };
+
+    const fade = (done) => {
+        const i = setInterval(() => {
+            player.opacity = player.opacity - 0.1;
+            if (player.opacity <= 0) {
+                clearInterval(i);
+                done();
+            }
+        }, 100);
+    };
+
+    class LevelManager {
+        constructor(loadLevelFns, player) {
+            this.loadFns = loadLevelFns;
+            this.player = player;
+            this.unloadCurrentLevel = null;
+            this._blockCalls = false;
+        }
+        loadNextLevel() {
+            if (this._blockCalls) return;
+            this._blockCalls = true;
+            setTimeout(() => { this._blockCalls = false }, 5000);
+            if (this.unloadCurrentLevel) {
+                this.unloadCurrentLevel();
+            }
+            this.unloadCurrentLevel = this.loadFns.shift()(this.player);
             spawnPlayer();
         }
+    }
 
-        const right = keyIsDown("d");
-        const left = keyIsDown("a");
+    const lvlManager = new LevelManager(LEVEL_CONFIG, player);
 
-        const isGrounded = player.grounded();
-        const isCrouching = player.crouching;
+    let blockCalls = false;
+    const goToNextLevel = () => {
+        if (blockCalls) return;
+        blockCalls = true;
+        setTimeout(() => blockCalls = false, 5000);
+        setCrouching(true);
+        fade(() => {
+            lvlManager.loadNextLevel();
+        });
+    };
 
-        const isRunning = (() => {
-            if (!isGrounded) return false;
-            if (isCrouching) return false;
-            if (left && right) return false;
-            if (left || right) return true;
-        })();
+    ready(() => {
 
-        if (isRunning) {
-            timeRunning = timeRunning + dt();
-        } else {
-            timeRunning = 0;
+        if (PLAY_MUSIC) {
+            setTimeout(() => {
+                play("dangerouspath", { volume: 0.3, loop: true });
+            }, 1000);
         }
 
-        if (isCrouching) {
-            playerAnim("crouch");
-            return;
-        }
+        lvlManager.loadNextLevel();
+        spawnPlayer();
 
-        if (isGrounded) {
-            if (isRunning) {
-                playerAnim("run");
-            } else {
-                playerAnim("idle");
+        playerAnim("idle");
+
+        keyPress("space", () => {
+            if (player.grounded() && !player.crouching) {
+                player.jump();
+                player.play("jump");
+                play("jumpSound", { volume: 0.15 })
             }
-        }
+        });
 
-        const moveSpeed = getMoveSpeed(isGrounded);
-        if (left && !right) {
-            player.flipX(true);
-            player.move(-moveSpeed, 0);
-        } else if (right && !left) {
-            player.flipX(false);
-            player.move(moveSpeed, 0);
-        }
+        keyPress(["w", "e"], () => {
+            const door = get("goal")[0];
+            if (player.isTouching(door)) {
+                goToNextLevel();
+            }
+        });
+
+        keyPress(["e", "enter"], () => {
+            const computers = get("computer");
+            if (computers.length === 0) return;
+            computers.forEach((computer) => {
+                if (player.isTouching(computer)) {
+                    player.trigger("computing", computer);
+                }
+            });
+        });
+
+        player.on("computing", () => {
+            setCrouching(true);
+        });
+        player.on("doneComputing", () => {
+            focus();
+            setTimeout(() => setCrouching(false), 100);
+        });
+
+        let timeRunning = 0;
+
+        const getMoveSpeed = (isGrounded) => {
+            const additionalSpeed = Math.min(timeRunning, 1) * 100;
+            const speed = player.speed + additionalSpeed;
+            if (!isGrounded) return speed * 0.75;
+            return speed;
+        };
+
+        player.action(() => {
+
+            if (player.pos.y > 2000 || player.pos.y < -5) {
+                spawnPlayer();
+            }
+
+            const right = keyIsDown("d");
+            const left = keyIsDown("a");
+
+            const isGrounded = player.grounded();
+            const isCrouching = player.crouching;
+
+            const isRunning = (() => {
+                if (!isGrounded) return false;
+                if (isCrouching) return false;
+                if (left && right) return false;
+                if (left || right) return true;
+            })();
+
+            if (isRunning) {
+                timeRunning = timeRunning + dt();
+            } else {
+                timeRunning = 0;
+            }
+
+            if (isCrouching) {
+                playerAnim("crouch");
+                return;
+            }
+
+            if (isGrounded) {
+                if (isRunning) {
+                    playerAnim("run");
+                } else {
+                    playerAnim("idle");
+                }
+            }
+
+            const moveSpeed = getMoveSpeed(isGrounded);
+            if (left && !right) {
+                player.flipX(true);
+                player.move(-moveSpeed, 0);
+            } else if (right && !left) {
+                player.flipX(false);
+                player.move(moveSpeed, 0);
+            }
+
+        });
 
     });
+};
 
-});
+document.querySelector("#play-button").addEventListener("click", startGame);

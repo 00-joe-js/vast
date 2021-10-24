@@ -12,10 +12,48 @@ body {
   justify-content: center;
   align-items: center;
   font-family: 'Courier New', Courier, monospace;
+  background: rgb(25, 25, 25);
 }
 
 canvas {
   display: block;
+}
+
+#title-card {
+  width: 1200px;
+  height: 700px;
+  background: black;
+  position: relative;
+}
+
+#logo, #play-button {
+  color: white;
+  display:block;
+  font-family: 'Courier New', Courier, monospace;
+  text-align: center;
+  margin-top: 150px;
+  font-size: 42px;
+}
+
+#logo {
+  font-size: 96px;
+}
+
+#logo span {
+  display: inline-block;
+  position: relative;
+  top: 20px;
+  transform: rotateZ(10deg);
+}
+
+#play-button {
+  cursor: pointer;
+}
+
+#computing-gif {
+  position: absolute;
+  bottom: 0;
+  right: 0;
 }
 
 #code-container {
@@ -43,6 +81,7 @@ pre {
   position: fixed;
   right: 30px;
   bottom: 40px;
+  color: white;
 }
 
 #controls > span {

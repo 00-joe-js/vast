@@ -2,22 +2,32 @@
 <html>
 
 <head>
-	<title>kaboom</title>
+  <title>kaboom</title>
   <base href="/dist" />
-	<meta charset="utf-8">
-	<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/base16/zenburn.min.css">
-	<link rel="stylesheet" type="text/css" href="/style.css" />
+  <meta charset="utf-8">
+  <link rel="stylesheet"
+    href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.3.1/styles/base16/zenburn.min.css">
+  <link rel="stylesheet" type="text/css" href="/style.css" />
 </head>
 
 <body>
   <pre id="code-container"></pre>
+  <div id="title-card">
+    <span id="logo">va<span>s</span>t</span>
+    <div id="play-button">
+      > play
+    </div>
+    <img id="computing-gif" src="sprites/computing.gif" />
+  </div>
   <p id="controls">
     <span>w/a/s/d: <span>move</span></span>
     <span>space: <span>jump</span></span>
     <span>e: <span>use/go through door</span></span>
+    <br />
+    <span>Game screen is <span>1200x700</span></span>
   </p>
-	<script src="/game.js">
-	</script>
+  <script src="/game.js">
+  </script>
 </body>
 
 </html>
