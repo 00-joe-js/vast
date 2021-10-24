@@ -11,12 +11,14 @@ import loadLevel2 from "./levels/level2";
 import loadLevel3 from "./levels/level3";
 import loadLevel4 from "./levels/level4";
 import loadLevel5 from "./levels/level5";
+import loadLevel6 from "./levels/level6";
 const LEVEL_CONFIG = [
-    loadLevel1,
-    loadLevel2,
-    loadLevel3,
-    loadLevel4,
+    // loadLevel1,
+    // loadLevel2,
+    // loadLevel3,
+    // loadLevel4,
     loadLevel5,
+    loadLevel6,
 ];
 
 import kaboom from "kaboom";
@@ -104,7 +106,7 @@ ready(() => {
 
     if (PLAY_MUSIC) {
         setTimeout(() => {
-            play("dangerouspath", { volume: 0.4, loop: true });
+            play("dangerouspath", { volume: 0.3, loop: true });
         }, 1000);
     }
 

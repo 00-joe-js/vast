@@ -30,12 +30,12 @@ const buildPuter = ({ getCodeBlock, onExecute, player }, { puterPos, areaScaleX 
 
         if (computer !== puter) return;
 
-        play("computeOpen", { volume: 0.3 });
+        play("computeOpen", { volume: 0.15 });
 
         const execute = (typedCode) => {
             try {
                 onExecute(typedCode);
-                play("computeExecute", { volume: 0.3 });
+                play("computeExecute", { volume: 0.15 });
             } catch (e) {
                 puter.trigger("ABEL_error", e);
             }

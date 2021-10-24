@@ -45,6 +45,8 @@ export default (player) => {
         }
     }
 
+    const MAX_CALCULATIONS = 350;
+
     let amountPlats = 30;
     let disableRate = 100;
     const runCalculations = () => {
@@ -80,13 +82,13 @@ export default (player) => {
     ]);
 
     let lastTyped = `calculate(30, 100);`;
-    const puter = buildPuter(
+    const cleanupPuter = buildPuter(
         {
             getCodeBlock: () => {
                 return [
                     `// Every day, many calculations.`,
                     `const calculate = (amount, rate) => {`,
-                    `   if (amount > 300) CRASH();`,
+                    `   if (amount > ${MAX_CALCULATIONS}) CRASH();`,
                     `   setInterval(() => {`,
                     `       for (let i = 0; i < amount; i++) {`,
                     `           disable(randomPlatform())`,
@@ -104,7 +106,7 @@ export default (player) => {
                     if (typeof newAmount !== "number") {
                         throw new Error("Amount must be a number.");
                     }
-                    if (newAmount > 300) {
+                    if (newAmount > MAX_CALCULATIONS) {
                         throw new Error("EXCESSIVE CALCULATIONS.");
                     }
                     if (typeof newRate !== "number") {
@@ -134,7 +136,9 @@ export default (player) => {
     );
 
     return () => {
+        firstRow.forEach(destroy);
         grid.forEach(destroy);
+        cleanupPuter();
         destroy(goal);
     };
 
