@@ -39,6 +39,8 @@ export default () => {
         }
       }
     });
+
+    loadSprite("abel", "sprites/abel.png");
   
     // BG MUSIC
     // Thanks: https://joshuuu.itch.io/short-loopable-background-music
@@ -50,5 +52,5 @@ export default () => {
     loadSound("reset", "sounds/reset.wav");
     loadSound("jumpSound", "sounds/jump.wav");
     loadSound("door", "sounds/gothrough.wav");
-  
+    
   };

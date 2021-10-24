@@ -134,6 +134,10 @@ export const activateEditorAndSetContent = (block, onSubmit, pos = [0, 0]) => {
     editablePre.addEventListener("input", onInput);
     editablePre.addEventListener("keypress", onKeyPress);
 
+    const { caretPosition, selection, clonedRange } = getCaretPosition(editablePre);
+
+        recreateCaretPosition(editablePre, editablePre.textContent.length, selection, clonedRange);
+
     const deactivate = () => {
         window.removeEventListener("resize", positionBlock);
         editablePre.removeEventListener("input", onInput);

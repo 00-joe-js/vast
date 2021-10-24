@@ -102,7 +102,6 @@ export default (player) => {
                 lastTyped = typedCode;
 
                 window.ABEL_setNewCalculations = (newAmount, newRate) => {
-                    debugger;
                     if (typeof newAmount !== "number") {
                         throw new Error("Amount must be a number.");
                     }

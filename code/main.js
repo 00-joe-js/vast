@@ -12,13 +12,15 @@ import loadLevel3 from "./levels/level3";
 import loadLevel4 from "./levels/level4";
 import loadLevel5 from "./levels/level5";
 import loadLevel6 from "./levels/level6";
+import loadLevel7 from "./levels/level7";
 const LEVEL_CONFIG = [
-    loadLevel1,
-    loadLevel2,
-    loadLevel3,
-    loadLevel4,
-    loadLevel5,
-    loadLevel6,
+    // loadLevel1,
+    // loadLevel2,
+    // loadLevel3,
+    // loadLevel4,
+    // loadLevel5,
+    // loadLevel6,
+    loadLevel7
 ];
 
 import kaboom from "kaboom";
@@ -51,6 +53,7 @@ const startGame = () => {
             fastfalling: false,
             crouched: false,
             bodyOpts: bodyConfig,
+            phasing: false,
         },
         color(),
         z(1000),
@@ -125,7 +128,7 @@ const startGame = () => {
 
         if (PLAY_MUSIC) {
             setTimeout(() => {
-                play("dangerouspath", { volume: 0.3, loop: true });
+                window.BG_MUSIC = play("dangerouspath", { volume: 0.3, loop: true });
             }, 1000);
         }
 
@@ -144,6 +147,7 @@ const startGame = () => {
 
         keyPress(["w", "e"], () => {
             const door = get("goal")[0];
+            if (!door) return;
             if (player.isTouching(door)) {
                 goToNextLevel();
             }
@@ -178,7 +182,9 @@ const startGame = () => {
 
         player.action(() => {
 
-            if (player.pos.y > 2000 || player.pos.y < -5) {
+            if (player.phasing) return;
+
+            if (layer.pos.y > 2000 || player.pos.y < -5) {
                 spawnPlayer();
             }
 

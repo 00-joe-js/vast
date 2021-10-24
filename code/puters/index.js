@@ -1,12 +1,12 @@
 import { activateEditorAndSetContent } from "../misc/editorUtils";
 
-const buildPuter = ({ getCodeBlock, onExecute, player }, { puterPos, areaScaleX = 3, codeWindowPos, orig = "left", autoOpen = false, errorTextScale = 1 }) => {
+const buildPuter = ({ getCodeBlock, onExecute, player, onAction = null }, { puterPos, areaScaleX = 3, areaScaleY = 1, codeWindowPos, orig = "left", autoOpen = false, errorTextScale = 1 }) => {
 
     const puter = add([
         pos(...puterPos),
         sprite("puterIdle"),
         scale(2),
-        area({ scale: { x: areaScaleX, y: 1 } }),
+        area({ scale: { x: areaScaleX, y: areaScaleY } }),
         origin(orig),
         "computer"
     ]);
@@ -34,7 +34,7 @@ const buildPuter = ({ getCodeBlock, onExecute, player }, { puterPos, areaScaleX 
 
         const execute = (typedCode) => {
             try {
-                onExecute(typedCode);
+                onExecute(typedCode, puter);
                 play("computeExecute", { volume: 0.15 });
             } catch (e) {
                 puter.trigger("ABEL_error", e);
@@ -51,6 +51,12 @@ const buildPuter = ({ getCodeBlock, onExecute, player }, { puterPos, areaScaleX 
 
     if (autoOpen) {
         open(puter);
+    }
+
+    if (onAction) {
+        puter.action(() => {
+            onAction(puter);
+        });
     }
 
     return () => {
