@@ -139,6 +139,7 @@ export default (player) => {
         firstRow.forEach(destroy);
         grid.forEach(destroy);
         cleanupPuter();
+        clearInterval(runningCalculations);
         destroy(goal);
     };
 

@@ -8,6 +8,8 @@ export default (player) => {
     const cellWidth = window.LEVEL_CELL_WIDTH;
     const cellHeight = window.LEVEL_CELL_HEIGHT;
 
+    const actions = [];
+
     const levelConfig = {
         width: cellWidth,
         height: cellHeight,
@@ -38,7 +40,7 @@ export default (player) => {
         origin("center"),
     ]);
 
-    action(() => {
+    const waveAction = action(() => {
         strip.opacity = wave(0.4, 1, time() * 25);
     });
 
@@ -48,8 +50,11 @@ export default (player) => {
 
     let currentGravity = 0.15;
 
-
+    let unloaded = false;
     action(() => {
+        if (unloaded) {
+            return;
+        }
         const isTouching = strip.isTouching(player);
 
 
@@ -154,10 +159,13 @@ export default (player) => {
     );
 
     return () => {
+        // cancelGravAction();
+        // waveAction();
         destroy(level);
         destroy(strip);
         cleanupResetPuter();
         cleanupPuter();
+        unloaded = true;
     };
 
 };
