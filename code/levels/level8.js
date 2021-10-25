@@ -3,7 +3,7 @@ import { showDialogWindow } from "../misc/editorUtils";
 
 export default (player) => {
 
-    player.spawnPoint = vec2(1950, 275);
+    player.spawnPoint = vec2(100, 275);
 
     camScale(1, 1);
 
@@ -13,6 +13,8 @@ export default (player) => {
 
     const cellWidth = window.LEVEL_CELL_WIDTH;
     const cellHeight = window.LEVEL_CELL_HEIGHT;
+
+    let bossMusic = null;
 
     const levelConfig = {
         width: cellWidth,
@@ -106,14 +108,18 @@ export default (player) => {
 
     const createElevatorWalls = () => {
         const leftWall = add([
-            rect(350, height() * 4),
+            rect(350, height() * 8),
             color(255, 255, 255),
-            pos(750, -1000)
+            pos(750, -1000),
+            area(),
+            solid()
         ]);
         const rightWall = add([
-            rect(350, height() * 4),
+            rect(350, height() * 8),
             color(255, 255, 255),
-            pos(2900, -1000)
+            pos(2900, -1000),
+            area(),
+            solid()
         ])
         return [leftWall, rightWall];
     };
@@ -126,7 +132,16 @@ export default (player) => {
                 ["const noEscape = true;"]
             ];
         },
-        onExecute() {
+        onExecute(typedCode) {
+            let answer = true;
+            window.ABEL_noEscape = (theirAnswer) => {
+                answer = theirAnswer;
+            }
+            eval(`
+                ${typedCode}
+                window.ABEL_noEscape(noEscape);
+            `);
+            if (answer !== false) return;
             let scale = 1;
             let tilt = player.pos.y;
             const destTilt = tilt - 500;
@@ -148,10 +163,10 @@ export default (player) => {
                     setTimeout(() => {
                         shake(10),
                             elevatorSpeed = 1000;
-                    }, 200);
+                    }, 2000);
                     setTimeout(() => {
                         startBoss();
-                    }, 200);
+                    }, 7000);
                 }
                 camScale(scale, scale);
                 camPos(2000, tilt);
@@ -182,8 +197,38 @@ export default (player) => {
     let phase2Puter = { puter: null, clean: null };
     let phase3Puter = { puter: null, clean: null };
 
+    let barColor = "white";
+
+    let phase1Output = add([
+        text("0", { font: "sink", size: 72 }),
+        pos(1500, 600),
+        color(255, 0, 0),
+        origin('center'),
+        opacity(0),
+    ]);
+
+    let phase2Output = add([
+        text("0", { font: "sink", size: 72 }),
+        pos(2000, 600),
+        color(255, 0, 0),
+        origin('center'),
+        opacity(0),
+    ]);
+
+    let phase3Output = add([
+        text("0", { font: "sink", size: 72 }),
+        pos(2510, 600),
+        color(255, 0, 0),
+        origin('center'),
+        opacity(0),
+    ]);
+
+
+    let phaseTrueAnswers = [null, null, null];
+
     const startBoss = () => {
 
+        player.spawnPoint = vec2(1950, 275);
         player.bossFight = true;
         noEscapePuter.trigger("ABEL_error", new Error("NO"));
         window.BG_MUSIC.stop();
@@ -197,21 +242,41 @@ export default (player) => {
             const { destroy } = showDialogWindow(["I will not be left alone."], [550, 350]);
             setTimeout(() => {
                 destroy();
-                play("bossMusic", { volume: 0.2, loop: true });
-                bossBattlePhase2();
+                bossMusic = play("bossMusic", { volume: 0.2, loop: true });
+                phase1Output.opacity = 1;
+                phase2Output.opacity = 1;
+                phase3Output.opacity = 1;        
+                bossBattlePhase1();
                 abel.color = rgb(0, 0, 0);
-            }, 200);
-        }, 200);
+            }, 4000);
+        }, 3000);
 
+
+        let puter1LastTyped = `bar.color = "white";`;
         phase1Puter.clean = buildPuter({
             getCodeBlock() {
                 return [
-                    "// Test.",
-                    [""]
+                    "// A mesh in the universe.",
+                    [puter1LastTyped],
+                    "if (bar.touches(star) && bar.color === star.color) {",
+                    `   destroy(star);`,
+                    "}"
                 ];
             },
-            onExecute() {
-
+            onExecute(typedCode) {
+                puter1LastTyped = typedCode;
+                window.ABEL_receiveBarColor = (color) => {
+                    if (!color) barColor = "white";
+                    barColor = color;
+                };
+                eval(
+                    `
+                        const bar = {};
+                        bar.color = "white";
+                        ${typedCode}
+                        window.ABEL_receiveBarColor(bar.color);
+                    `
+                );
             },
             onAction(p) {
                 if (!phase1Puter.puter) phase1Puter.puter = p;
@@ -246,7 +311,6 @@ export default (player) => {
                 window.ABEL_setBlackHolePosAtSecond = (n, x, y) => {
                     blackHolePositions[n].x = x;
                     blackHolePositions[n].y = y;
-                    console.log(n, x, y);
                 };
                 eval(
                     `
@@ -259,7 +323,6 @@ export default (player) => {
                         }
                     `
                 );
-                console.log(blackHolePositions);
             },
             onAction(p) {
                 if (!phase2Puter.puter) phase2Puter.puter = p;
@@ -273,15 +336,30 @@ export default (player) => {
             areaScaleX: 5
         });
 
+        let puter3LastTyped = `       0       // x`
         phase3Puter.clean = buildPuter({
             getCodeBlock() {
                 return [
-                    "// Test 3.",
-                    [""]
+                    "// The universe is staggering.",
+                    "for (let i = 0; i < 7; i++) {",
+                    `   spawnPlatform(`,
+                    [puter3LastTyped],
+                    "       i * 100 // y",
+                    `   );`,
+                    "}",
                 ];
             },
-            onExecute() {
-
+            onExecute(typedCode) {
+                puter3LastTyped = typedCode;
+                window.ABEL_setStaggeredPlatforms = (i, startX) => {
+                    platStartPositions[i] = startX;
+                };
+                eval(`
+                    for (let i = 0; i < 7; i++) {
+                        const x = ${typedCode};
+                        window.ABEL_setStaggeredPlatforms(i, x);
+                    }
+                `);
             },
             onAction(p) {
                 if (!phase3Puter.puter) phase3Puter.puter = p;
@@ -300,11 +378,29 @@ export default (player) => {
     const bossBattlePhase1 = () => {
 
         const transitionToNextPhase = () => {
+            bar.destroy();
             randomBlocks.forEach(destroy);
             bossBattlePhase2();
         };
+
+        const bar = add([
+            rect(1800, 2),
+            pos(1100, 0),
+            opacity(0.7),
+            color(255, 255, 255),
+            area({ height: 20 }),
+            z(5),
+        ]);
+
+        bar.action(() => {
+            const t = time();
+            bar.opacity = wave(0.2, 0.9, t * 100);
+        });
+
+        phaseTrueAnswers[0] = 0;
         const randomBlocks = new Array(randi(100, 300)).fill(null).map(() => {
             const isRed = chance(0.5);
+            if (isRed) phaseTrueAnswers[0] = phaseTrueAnswers[0] + 1;
             const block = add([
                 circle(3),
                 color(isRed ? [255, 0, 0] : [255, 255, 255]),
@@ -317,19 +413,39 @@ export default (player) => {
                 })
             ]);
             block.action(() => {
+
+                if (barColor === "red") {
+                    bar.color = rgb(255, 0, 0);
+                } else {
+                    bar.color = rgb(255, 255, 255);
+                }
+
                 if (block.fall === true) {
                     block.pos.y = block.pos.y + (dt() * 750);
+
+                    if (block.isTouching(bar)) {
+                        if (barColor === "red" && isRed) {
+                            block.destroy();
+                            phase1Output.text = parseInt(phase1Output.text) + 1;
+                        } else if (barColor === "white" && !isRed) {
+                            block.destroy();
+                        }
+                    }
+
                     if (block.isTouching(player) && isRed && !player.hitStun) {
                         player.trigger("hit");
                         block.destroy();
                     }
+
                     if (block.isTouching(bossPlat)) {
                         block.destroy();
                     }
+
                 }
             });
             return block;
         });
+
         setTimeout(() => {
             transitionToNextPhase();
         }, 10000);
@@ -372,7 +488,9 @@ export default (player) => {
 
         });
 
-        const randomBlocks = new Array(randi(100, 300)).fill(null).map(() => {
+        const howMany = randi(100, 300);
+        phaseTrueAnswers[1] = howMany;
+        const randomBlocks = new Array(howMany).fill(null).map(() => {
             const initialPos = [randi(1200, 1200 + 1600), randi(100, -650)];
             const speed = randi(2, 7);
             let touchingBlackHole = false;
@@ -394,6 +512,7 @@ export default (player) => {
                 if (block.isTouching(blackHole)) {
                     touchingBlackHole = true;
                     setTimeout(() => {
+                        phase2Output.text = parseInt(phase2Output.text) + 1;
                         block.destroy();
                     }, 500);
                 }
@@ -420,7 +539,7 @@ export default (player) => {
         const transitionToNextPhase = () => {
             blackHole.destroy();
             randomBlocks.forEach(destroy);
-            bossBattlePhase1();
+            bossBattlePhase3();
         };
 
         setTimeout(() => {
@@ -429,18 +548,25 @@ export default (player) => {
 
     };
 
+    let platStartPositions = [
+        0, 0, 0, 0, 0, 0, 0
+    ];
     const bossBattlePhase3 = () => {
 
+
+        phaseTrueAnswers[2] = 7;
         const leftX = 1100;
         const topY = -700;
 
-        const platConfigs = new Array(12).fill(null).map((_, i) => {
+        const platConfigs = new Array(7).fill(null).map((_, i) => {
             return {
-                width: 300, height: 10, x: leftX + (i % 2 === 0 ? 500 : 0), y: topY + 100 + (i * 100)
+                width: 300, height: 10, x: leftX + platStartPositions[i], y: topY + 500 + (i * 100)
             }
         });
 
-        const allPlats = platConfigs.map(config => {
+        const landedPlats = {};
+
+        const allPlats = platConfigs.map((config, i) => {
             const plat = add([
                 rect(config.width, config.height),
                 pos(config.x, config.y),
@@ -452,6 +578,10 @@ export default (player) => {
             plat.action(() => {
                 if (player.curPlatform() === plat) {
                     plat.color = rgb(255, 0, 0);
+                    if (!landedPlats[i]) {
+                        landedPlats[i] = true;
+                        phase3Output.text = parseInt(phase3Output.text) + 1;
+                    }
                 }
                 if (dir === 1 && plat.pos.x >= leftX + 1500) {
                     dir = -1;
@@ -465,16 +595,105 @@ export default (player) => {
 
         const transitionToNextPhase = () => {
             allPlats.forEach(destroy);
-            bossBattlePhase1();
+            bossBattlePhase4();
         };
         setTimeout(() => {
             transitionToNextPhase();
-        }, 10000);
+        }, 15000);
 
     };
 
     const bossBattlePhase4 = () => {
 
+        const phaseAnswersFound = [
+            parseInt(phase1Output.text),
+            parseInt(phase2Output.text),
+            parseInt(phase3Output.text),
+        ];
+
+        abel.opacity = 0.1;
+        abel.color = rgb(255, 255, 255);
+
+        let successCount = 0;
+        const setSuceed = (theText) => {
+            theText.color = rgb(0, 255, 0);
+            play("computeExecute", { volume: 0.1 });
+            successCount = successCount + 1;
+        };
+        const setFail = (theText) => {
+            theText.color = rgb(10, 10, 10);
+            play("computeError", { volume: 0.1 });
+        };
+        const reset = (theText) => {
+            theText.color = rgb(255, 0, 0);
+            theText.text = 0;
+        };
+
+        const checkAnswer = (whichPhase) => {
+            return true;
+            return phaseAnswersFound[whichPhase] === phaseTrueAnswers[whichPhase];
+        };
+
+        setTimeout(() => {
+            if (checkAnswer(0)) {
+                setSuceed(phase1Output);
+            } else {
+                setFail(phase1Output);
+            }
+        }, 2000);
+
+        setTimeout(() => {
+            if (checkAnswer(1)) {
+                setSuceed(phase2Output);
+            } else {
+                setFail(phase2Output);
+            }
+        }, 3500);
+
+        setTimeout(() => {
+            if (checkAnswer(2)) {
+                setSuceed(phase3Output);
+            } else {
+                setFail(phase3Output);
+            }
+        }, 5000);
+
+        setTimeout(() => {
+            if (successCount === 3) {
+                win();
+            } else {
+                reset(phase1Output);
+                reset(phase2Output);
+                reset(phase3Output);
+                abel.opacity = 0.05;
+                abel.color = rgb(10, 10, 10);
+                bossBattlePhase1();
+            }
+        }, 6500);
+
+    };
+
+    const win = () => {
+        bossMusic.stop();
+        setTimeout(() => {
+            window.BG_MUSIC.play();
+            elevatorSpeed = 1000;
+            const fadingAbel = setInterval(() => {
+                abel.opacity = abel.opacity - 0.025;
+                if (abel.opacity <= 0) {
+                    clearInterval(fadingAbel);
+                }
+            }, 300);
+            setTimeout(() => {
+                const camDest = camPos().y + 1500;
+                const moveCam = setInterval(() => {
+                    camPos(camPos().x, camPos().y + (dt() * 500));
+                    if (camPos().y >= camDest) {
+                        clearInterval(moveCam);
+                    }
+                }, 20);
+            }, 2000);
+        }, 1000);
     };
 
     return () => {
