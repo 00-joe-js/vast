@@ -630,7 +630,6 @@ export default (player) => {
         };
 
         const checkAnswer = (whichPhase) => {
-            return true;
             return phaseAnswersFound[whichPhase] === phaseTrueAnswers[whichPhase];
         };
 
