@@ -15,13 +15,13 @@ import loadLevel6 from "./levels/level6";
 import loadLevel7 from "./levels/level7";
 import loadLevel8 from "./levels/level8";
 const LEVEL_CONFIG = [
-    loadLevel1,
-    loadLevel2,
-    loadLevel3,
-    loadLevel4,
-    loadLevel5,
-    loadLevel6,
-    loadLevel7,
+    // loadLevel1,
+    // loadLevel2,
+    // loadLevel3,
+    // loadLevel4,
+    // loadLevel5,
+    // loadLevel6,
+    // loadLevel7,
     loadLevel8,
 ];
 
@@ -56,6 +56,8 @@ const startGame = () => {
             crouched: false,
             bodyOpts: bodyConfig,
             phasing: false,
+            hitStun: false,
+            bossFight: false,
         },
         color(),
         z(1000),
@@ -63,9 +65,9 @@ const startGame = () => {
         "player"
     ]);
 
-    const playerAnim = (anim) => {
+    const playerAnim = (anim, loop = true) => {
         if (player.curAnim() !== anim) {
-            player.play(anim, { loop: true });
+            player.play(anim, { loop });
         }
     };
 
@@ -138,7 +140,7 @@ const startGame = () => {
         playerAnim("idle");
 
         keyPress("space", () => {
-            if (player.grounded() && !player.crouching) {
+            if (player.grounded() && !player.crouching && !player.hitStun) {
                 player.jump();
                 player.play("jump");
                 play("jumpSound", { volume: 0.15 })
@@ -154,6 +156,7 @@ const startGame = () => {
         });
 
         keyPress(["e", "enter"], () => {
+            if (player.hitStun) return;
             const computers = get("computer");
             if (computers.length === 0) return;
             computers.forEach((computer) => {
@@ -170,6 +173,19 @@ const startGame = () => {
             focus();
             setTimeout(() => setCrouching(false), 100);
         });
+        player.on("hit", () => {
+            play("computeError", { volume: 0.2 });
+            player.color = rgb(255, 0, 0);
+            shake(10);
+            player.hitStun = true;
+            player.play("hit", {loop: false, onEnd: () => {
+                playerAnim("sit");
+            }});
+            setTimeout(() => {
+                player.hitStun = false;
+                player.color = rgb(255, 255, 255);
+            }, 1500);
+        });
 
         let timeRunning = 0;
 
@@ -184,7 +200,9 @@ const startGame = () => {
 
             if (player.phasing) return;
 
-            if (player.pos.y > 2000 || player.pos.y < -5) {
+            if (player.hitStun) return;
+
+            if (!player.bossFight && (player.pos.y > 2000 || player.pos.y < -5)) {
                 spawnPlayer();
             }
 

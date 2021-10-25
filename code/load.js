@@ -25,6 +25,14 @@ export default () => {
         float: {
           from: (12 * 14) + 1,
           to: (12 * 14) + 3
+        },
+        hit: {
+          from: (17 * 14) + 1,
+          to: (17 * 14) + 5
+        },
+        sit: {
+          from: (17 * 14) + 5,
+          to: (17 * 14) + 5,
         }
       }
     });
@@ -51,6 +59,7 @@ export default () => {
     loadSound("computeExecute", "sounds/execute.wav");
     loadSound("reset", "sounds/reset.wav");
     loadSound("jumpSound", "sounds/jump.wav");
-    loadSound("door", "sounds/gothrough.wav");
+    loadSound("scream", "sounds/scream.wav");
+    loadSound("bossMusic", "sounds/battle.wav");
     
   };
