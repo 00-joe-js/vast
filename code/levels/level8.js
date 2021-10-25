@@ -1,8 +1,11 @@
 import buildPuter from "../puters";
 import { showDialogWindow } from "../misc/editorUtils";
 
+import loadWinLevel from "./winLevel";
+
 export default (player) => {
 
+    window.BG_MUSIC.play();
     player.spawnPoint = vec2(100, 275);
 
     camScale(1, 1);
@@ -15,6 +18,8 @@ export default (player) => {
     const cellHeight = window.LEVEL_CELL_HEIGHT;
 
     let bossMusic = null;
+    let currentPhaseUnload = null;
+    let unloads = [];
 
     const levelConfig = {
         width: cellWidth,
@@ -36,7 +41,6 @@ export default (player) => {
             ];
         }
     };
-
     const levelMapString = [
         "                    ",
         "                    ",
@@ -59,8 +63,7 @@ export default (player) => {
         "                    ",
         "                    "
     ];
-
-    let elevatorSpeed = 0;
+    const level = addLevel(levelMapString, levelConfig);
 
     const bossPlat = add([
         rect(1800, cellHeight / 2),
@@ -69,7 +72,8 @@ export default (player) => {
         pos(1100, 500),
         "bossPlat"
     ]);
-    const level = addLevel(levelMapString, levelConfig);
+
+    let elevatorSpeed = 0;
 
     let preventCreateNewStars = false;
     let stars = [];
@@ -123,9 +127,9 @@ export default (player) => {
         ])
         return [leftWall, rightWall];
     };
+    let walls;
 
     let noEscapePuter = null;
-
     const cleanStartPuter = buildPuter({
         getCodeBlock() {
             return [
@@ -136,7 +140,7 @@ export default (player) => {
             let answer = true;
             window.ABEL_noEscape = (theirAnswer) => {
                 answer = theirAnswer;
-            }
+            };
             eval(`
                 ${typedCode}
                 window.ABEL_noEscape(noEscape);
@@ -147,7 +151,8 @@ export default (player) => {
             const destTilt = tilt - 500;
             destroy(level);
             turnoffCamFollow();
-            createElevatorWalls();
+            const timers = [];
+            walls = createElevatorWalls();
             const camZoomOut = setInterval(() => {
                 scale = scale - dt();
                 if (scale <= 0.5) {
@@ -160,20 +165,27 @@ export default (player) => {
                 if (scale === 0.5 && tilt === destTilt) {
                     clearInterval(camZoomOut);
                     new Array(70).fill(null).map(() => createStar(true));
-                    setTimeout(() => {
-                        shake(10),
-                            elevatorSpeed = 1000;
-                    }, 2000);
-                    setTimeout(() => {
+                    timers.push(setTimeout(() => {
+                        shake(10);
+                        elevatorSpeed = 1000;
+                        play("elevator", { volume: 0.1 });
+                    }, 2000));
+                    timers.push(setTimeout(() => {
                         startBoss();
-                    }, 7000);
+                    }, 7000));
                 }
                 camScale(scale, scale);
                 camPos(2000, tilt);
-            }, 1);
+            }, 5);
+            unloads.push(() => {
+                timers.forEach(clearTimeout);
+                destroy(walls);
+                clearInterval(camZoomOut);
+            });
         },
-        onAction(puter) {
-            noEscapePuter = puter;
+        onAction(p) {
+            // To be used to display error message when Abel arrives.
+            if (!noEscapePuter) noEscapePuter = p;
         },
         player
     }, {
@@ -191,13 +203,10 @@ export default (player) => {
         origin("center"),
         z(-3)
     ]);
-    window.abel = abel;
 
     let phase1Puter = { puter: null, clean: null };
     let phase2Puter = { puter: null, clean: null };
     let phase3Puter = { puter: null, clean: null };
-
-    let barColor = "white";
 
     let phase1Output = add([
         text("0", { font: "sink", size: 72 }),
@@ -206,7 +215,6 @@ export default (player) => {
         origin('center'),
         opacity(0),
     ]);
-
     let phase2Output = add([
         text("0", { font: "sink", size: 72 }),
         pos(2000, 600),
@@ -214,7 +222,6 @@ export default (player) => {
         origin('center'),
         opacity(0),
     ]);
-
     let phase3Output = add([
         text("0", { font: "sink", size: 72 }),
         pos(2510, 600),
@@ -222,8 +229,6 @@ export default (player) => {
         origin('center'),
         opacity(0),
     ]);
-
-
     let phaseTrueAnswers = [null, null, null];
 
     const startBoss = () => {
@@ -234,23 +239,29 @@ export default (player) => {
         window.BG_MUSIC.stop();
         shake(100);
         elevatorSpeed = 0;
-        cleanStartPuter();
         abel.pos = vec2(2000, 475 - 500);
         abel.color = rgb(255, 0, 0);
 
-        setTimeout(() => {
+        cleanStartPuter();
+
+        const timers = [];
+
+        timers.push(setTimeout(() => {
+            play("scream", { volume: 0.05 });
+        }, 2000));
+
+        timers.push(setTimeout(() => {
             const { destroy } = showDialogWindow(["I will not be left alone."], [550, 350]);
-            setTimeout(() => {
+            timers.push(setTimeout(() => {
                 destroy();
-                bossMusic = play("bossMusic", { volume: 0.2, loop: true });
+                bossMusic = play("bossMusic", { volume: 0.1, loop: true });
                 phase1Output.opacity = 1;
                 phase2Output.opacity = 1;
-                phase3Output.opacity = 1;        
-                bossBattlePhase1();
+                phase3Output.opacity = 1;
+                bossBattlePhase4();
                 abel.color = rgb(0, 0, 0);
-            }, 4000);
-        }, 3000);
-
+            }, 4000));
+        }, 3000));
 
         let puter1LastTyped = `bar.color = "white";`;
         phase1Puter.clean = buildPuter({
@@ -336,15 +347,17 @@ export default (player) => {
             areaScaleX: 5
         });
 
-        let puter3LastTyped = `       0       // x`
+        let puter3LastTyped = `const x = 0;`
         phase3Puter.clean = buildPuter({
             getCodeBlock() {
                 return [
                     "// The universe is staggering.",
                     "for (let i = 0; i < 7; i++) {",
-                    `   spawnPlatform(`,
                     [puter3LastTyped],
-                    "       i * 100 // y",
+                    "const y = i * 100;",
+                    `   spawnPlatform(`,
+                    `      x`,
+                    `      y`,
                     `   );`,
                     "}",
                 ];
@@ -356,7 +369,7 @@ export default (player) => {
                 };
                 eval(`
                     for (let i = 0; i < 7; i++) {
-                        const x = ${typedCode};
+                        ${typedCode}
                         window.ABEL_setStaggeredPlatforms(i, x);
                     }
                 `);
@@ -375,13 +388,8 @@ export default (player) => {
 
     };
 
+    let barColor = "white";
     const bossBattlePhase1 = () => {
-
-        const transitionToNextPhase = () => {
-            bar.destroy();
-            randomBlocks.forEach(destroy);
-            bossBattlePhase2();
-        };
 
         const bar = add([
             rect(1800, 2),
@@ -392,33 +400,39 @@ export default (player) => {
             z(5),
         ]);
 
+        // This is a fallback win condition.
+        let barAlwaysRed = true;
+
         bar.action(() => {
             const t = time();
             bar.opacity = wave(0.2, 0.9, t * 100);
+            if (barColor === "red") {
+                bar.color = rgb(255, 0, 0);
+            } else {
+                bar.color = rgb(255, 255, 255);
+            }
+            if (barAlwaysRed === true && barColor !== "red") {
+                barAlwaysRed = false;
+            }
         });
 
         phaseTrueAnswers[0] = 0;
-        const randomBlocks = new Array(randi(100, 300)).fill(null).map(() => {
+        const randomBlocks = new Array(randi(150, 250)).fill(null).map(() => {
             const isRed = chance(0.5);
             if (isRed) phaseTrueAnswers[0] = phaseTrueAnswers[0] + 1;
+
             const block = add([
                 circle(3),
                 color(isRed ? [255, 0, 0] : [255, 255, 255]),
                 pos(randi(1100, 1100 + 1800), -800),
                 area({ width: 7, height: 7 }),
                 opacity(1),
-                timer(rand(0.05, 4), () => {
+                timer(rand(0.05, 7), () => {
                     block.opacity = 1;
                     block.fall = true;
                 })
             ]);
             block.action(() => {
-
-                if (barColor === "red") {
-                    bar.color = rgb(255, 0, 0);
-                } else {
-                    bar.color = rgb(255, 255, 255);
-                }
 
                 if (block.fall === true) {
                     block.pos.y = block.pos.y + (dt() * 750);
@@ -446,9 +460,30 @@ export default (player) => {
             return block;
         });
 
-        setTimeout(() => {
+        const plannedTransition = setTimeout(() => {
             transitionToNextPhase();
         }, 10000);
+
+        const unload = () => {
+            clearTimeout(plannedTransition);
+            bar.destroy();
+            randomBlocks.forEach(destroy);
+        };
+
+        const transitionToNextPhase = () => {
+            // This is to avoid some weird focus issues.
+            // If the bar is red the whole phase, they auto win 
+            // by changing the phase's true answer (amount of redstars)
+            // to be whatever the computer picked up
+            if (barAlwaysRed) {
+                phaseTrueAnswers[0] = parseInt(phase1Output.text);
+            }
+            unload();
+            bossBattlePhase2();
+        };
+
+        currentPhaseUnload = unload;
+
     };
 
     const blackHolePositions = [
@@ -506,7 +541,7 @@ export default (player) => {
             ]);
             block.action(() => {
                 if (touchingBlackHole) {
-                    block.moveTo(blackHole.pos.x, blackHole.pos.y, 200);
+                    block.moveTo(blackHole.pos.x, blackHole.pos.y, 700);
                     return;
                 }
                 if (block.isTouching(blackHole)) {
@@ -536,15 +571,22 @@ export default (player) => {
             randomBlocks.forEach(block => block.fall = true);
         }, 7500);
 
-        const transitionToNextPhase = () => {
+        const plannedTransition = setTimeout(() => {
+            transitionToNextPhase();
+        }, 11000);
+
+        const unload = () => {
+            clearTimeout(plannedTransition);
             blackHole.destroy();
             randomBlocks.forEach(destroy);
+        };
+
+        const transitionToNextPhase = () => {
+            unload();
             bossBattlePhase3();
         };
 
-        setTimeout(() => {
-            transitionToNextPhase();
-        }, 12000);
+        currentPhaseUnload = unload;
 
     };
 
@@ -630,34 +672,37 @@ export default (player) => {
         };
 
         const checkAnswer = (whichPhase) => {
+            return true;
             return phaseAnswersFound[whichPhase] === phaseTrueAnswers[whichPhase];
         };
 
-        setTimeout(() => {
+        const timers = [];
+
+        timers.push(setTimeout(() => {
             if (checkAnswer(0)) {
                 setSuceed(phase1Output);
             } else {
                 setFail(phase1Output);
             }
-        }, 2000);
+        }, 2000));
 
-        setTimeout(() => {
+        timers.push(setTimeout(() => {
             if (checkAnswer(1)) {
                 setSuceed(phase2Output);
             } else {
                 setFail(phase2Output);
             }
-        }, 3500);
+        }, 3500));
 
-        setTimeout(() => {
+        timers.push(setTimeout(() => {
             if (checkAnswer(2)) {
                 setSuceed(phase3Output);
             } else {
                 setFail(phase3Output);
             }
-        }, 5000);
+        }, 5000));
 
-        setTimeout(() => {
+        timers.push(setTimeout(() => {
             if (successCount === 3) {
                 win();
             } else {
@@ -668,8 +713,31 @@ export default (player) => {
                 abel.color = rgb(10, 10, 10);
                 bossBattlePhase1();
             }
-        }, 6500);
+        }, 6500));
 
+        currentPhaseUnload = () => {
+            timers.forEach(clearTimeout);
+        };
+
+    };
+
+    const cleanupBossLevel = () => {
+        destroy(level);
+        destroy(bossPlat);
+        destroy(abel);
+        cleanStartPuter();
+        walls.forEach(destroy);
+        stars.forEach(destroy);
+        destroy(phase1Output);
+        destroy(phase2Output);
+        destroy(phase3Output);
+        if (typeof currentPhaseUnload === "function") {
+            currentPhaseUnload();
+        }
+        turnoffCamFollow();
+        if (phase1Puter.clean) phase1Puter.clean();
+        if (phase2Puter.clean) phase2Puter.clean();
+        if (phase3Puter.clean) phase3Puter.clean();
     };
 
     const win = () => {
@@ -677,6 +745,8 @@ export default (player) => {
         setTimeout(() => {
             window.BG_MUSIC.play();
             elevatorSpeed = 1000;
+            shake(10);
+            play("elevator", { volume: 0.1 });
             const fadingAbel = setInterval(() => {
                 abel.opacity = abel.opacity - 0.025;
                 if (abel.opacity <= 0) {
@@ -691,12 +761,14 @@ export default (player) => {
                         clearInterval(moveCam);
                     }
                 }, 20);
-            }, 2000);
+                setTimeout(() => {
+                    cleanupBossLevel();
+                    loadWinLevel(player);
+                }, 5000);
+            }, 5000);
         }, 1000);
     };
 
-    return () => {
-        destroy(level);
-    };
+    return cleanupBossLevel;
 
 };

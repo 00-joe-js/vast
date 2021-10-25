@@ -16,7 +16,6 @@ export default (player) => {
         player.setAnim("idle");
     }, 800);
 
-
     const cellWidth = window.LEVEL_CELL_WIDTH;
     const cellHeight = window.LEVEL_CELL_HEIGHT;
 

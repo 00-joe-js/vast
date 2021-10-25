@@ -14,20 +14,51 @@ import loadLevel5 from "./levels/level5";
 import loadLevel6 from "./levels/level6";
 import loadLevel7 from "./levels/level7";
 import loadLevel8 from "./levels/level8";
+import winLevel from "./levels/winLevel";
 const LEVEL_CONFIG = [
     // loadLevel1,
-    // loadLevel2,
-    // loadLevel3,
-    // loadLevel4,
-    // loadLevel5,
-    // loadLevel6,
-    // loadLevel7,
+    loadLevel2,
+    loadLevel3,
+    loadLevel4,
+    loadLevel5,
+    loadLevel6,
+    loadLevel7,
     loadLevel8,
+    winLevel
 ];
+
+class LevelManager {
+    constructor(loadLevelFns, player, spawnPlayerFunc) {
+        this._allLevels = loadLevelFns;
+        this.currentLevelIndex = -1;
+        this.unloadCurrentLevel = null;
+        this._blockCalls = false;
+        this._player = player;
+        this._spawnPlayer = spawnPlayerFunc;
+    }
+    _loadLevel() {
+        if (this.unloadCurrentLevel) {
+            this.unloadCurrentLevel();
+        }
+        this.unloadCurrentLevel = this._allLevels[this.currentLevelIndex](this._player);
+        this._spawnPlayer();
+    }
+    loadNextLevel() {
+        if (this._blockCalls) return;
+        this._blockCalls = true;
+        setTimeout(() => { this._blockCalls = false }, 3000);
+        this.currentLevelIndex = this.currentLevelIndex + 1;
+        this._loadLevel();
+    }
+    loadSpecificLevel(level) {
+        this.currentLevelIndex = level - 1;
+        this._loadLevel();
+    }
+}
+
 
 import kaboom from "kaboom";
 import load from "./load";
-
 
 const startGame = () => {
     document.querySelector("#title-card").remove();
@@ -43,12 +74,23 @@ const startGame = () => {
 
     const bodyConfig = { weight: 1, jumpForce: 750, maxVel: 65536 };
 
+    const spawnPlayer = () => {
+        setCrouching(true);
+        player.opacity = 1;
+        player.moveTo(player.spawnPoint);
+        setTimeout(() => {
+            setCrouching(false);
+        }, 750);
+    };
+
+
     const player = add([
         sprite("player"),
         pos(),
         origin("bot"),
         area({ width: 30, height: 40 }),
         body(bodyConfig),
+        scale(1),
         {
             speed: 250,
             jumpHeight: 750,
@@ -58,6 +100,7 @@ const startGame = () => {
             phasing: false,
             hitStun: false,
             bossFight: false,
+            spawnPlayer,
         },
         color(),
         z(1000),
@@ -73,15 +116,6 @@ const startGame = () => {
 
     player.setAnim = playerAnim;
 
-    const spawnPlayer = () => {
-        setCrouching(true);
-        player.opacity = 1;
-        player.moveTo(player.spawnPoint);
-        setTimeout(() => {
-            setCrouching(false);
-        }, 750);
-    };
-
     const setCrouching = (bool) => {
         player.crouching = bool;
     };
@@ -96,26 +130,7 @@ const startGame = () => {
         }, 100);
     };
 
-    class LevelManager {
-        constructor(loadLevelFns, player) {
-            this.loadFns = loadLevelFns;
-            this.player = player;
-            this.unloadCurrentLevel = null;
-            this._blockCalls = false;
-        }
-        loadNextLevel() {
-            if (this._blockCalls) return;
-            this._blockCalls = true;
-            setTimeout(() => { this._blockCalls = false }, 5000);
-            if (this.unloadCurrentLevel) {
-                this.unloadCurrentLevel();
-            }
-            this.unloadCurrentLevel = this.loadFns.shift()(this.player);
-            spawnPlayer();
-        }
-    }
-
-    const lvlManager = new LevelManager(LEVEL_CONFIG, player);
+    const lvlManager = new LevelManager(LEVEL_CONFIG, player, spawnPlayer);
 
     let blockCalls = false;
     const goToNextLevel = () => {
@@ -169,10 +184,23 @@ const startGame = () => {
         player.on("computing", () => {
             setCrouching(true);
         });
+
         player.on("doneComputing", () => {
             focus();
+            mustUnlockKeyD = true;
+            mustUnlockKeyA = true;
             setTimeout(() => setCrouching(false), 100);
         });
+
+        let mustUnlockKeyA = false;
+        let mustUnlockKeyD = false;
+        keyPress(["a"], () => {
+            if (mustUnlockKeyA) mustUnlockKeyA = false;
+        });
+        keyPress(["d"], () => {
+            if (mustUnlockKeyD) mustUnlockKeyD = false;
+        });
+
         player.on("hit", () => {
             play("computeError", { volume: 0.2 });
             player.color = rgb(255, 0, 0);
@@ -206,8 +234,8 @@ const startGame = () => {
                 spawnPlayer();
             }
 
-            const right = keyIsDown("d");
-            const left = keyIsDown("a");
+            const right = keyIsDown("d") && !mustUnlockKeyD;
+            const left = keyIsDown("a") && !mustUnlockKeyA;
 
             const isGrounded = player.grounded();
             const isCrouching = player.crouching;

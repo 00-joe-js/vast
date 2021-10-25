@@ -61,5 +61,6 @@ export default () => {
     loadSound("jumpSound", "sounds/jump.wav");
     loadSound("scream", "sounds/scream.wav");
     loadSound("bossMusic", "sounds/battle.wav");
+    loadSound("elevator", "sounds/elevator.wav");
     
   };
