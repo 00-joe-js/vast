@@ -1,0 +1,240 @@
+import { showDialogWindow } from "../misc/editorUtils";
+import buildPuter from "../puters"
+
+const delay = (n) => {
+    return new Promise((r) => {
+        setTimeout(r, n);
+    });
+};
+
+const abelSay = (content, pos, destroyAfter = null) => {
+    const { destroy } = showDialogWindow(
+        content, pos
+    );
+    if (destroyAfter) {
+        setTimeout(() => {
+            destroy();
+        }, destroyAfter);
+    }
+    return destroy;
+};
+
+
+const buildScript = () => {
+   
+    const start = async () => {
+        await delay(5000);
+        abelSay(["You are an insignificant speck."],
+            [600, 300], 5000);
+        await delay(8000);
+        abelSay([
+            ["this is the weight of the universe"],
+            ["                          of everything AGAINST YOU"]
+        ], [700, 500], 6000);
+        await delay(3000);
+        abelSay([
+            "HOPELESS"
+        ], [50, 500], 10000);
+        await delay(2000);
+        abelSay([
+            "AFRAID"
+        ], [200, 200], 8000);
+        await delay(500);
+        abelSay([
+            "SMALL"
+        ], [1000, 600], 7500);
+        await delay(3000);
+    };
+
+    return {
+        start
+    }; //script runner;
+};
+
+export default (player) => {
+
+    player.bossFight = true;
+    camScale(1, 1);
+    camPos(600, 360);
+
+    player.spawnPoint = vec2(80, height() + 75);
+    player.spawnPlayer();
+
+    window.BG_MUSIC.stop();
+    loadSound("endMusic", "sounds/anormal.mp3")
+        .then(s => play("endMusic", { volume: 0.5 }))
+        .catch(() => window.BG_MUSIC.play());
+
+    setTimeout(() => {
+        loadSound("endMusicBackup", "sounds/alone.mp3")
+            .then(s => play("endMusicBackup", { volume: 0.5 }))
+            .catch(() => window.BG_MUSIC.play());
+    }, (2 * 60 + 2) * 1000);
+
+
+    const stars = new Array(500).fill(null).map(() => {
+        const initialPos = [randi(width() * 5 * -1, width() * 5), randi(height() * 5 * -1, height() * 5)];
+        const speed = randi(1, 5);
+        const star = add([
+            circle(1.2),
+            color(255, 255, 255),
+            pos(...initialPos),
+            z(-1),
+            {
+                speed,
+                initialPos
+            }
+        ]);
+        return star;
+    });
+
+
+    const cellWidth = window.LEVEL_CELL_WIDTH;
+    const cellHeight = window.LEVEL_CELL_HEIGHT;
+
+    const floor = add([
+        rect(width() * 4, cellHeight),
+        solid(),
+        area(),
+        origin("center"),
+        pos(camPos().x, height() + 100)
+    ]);
+
+    floor.action(() => {
+        stars.forEach(star => {
+            const { initialPos, speed } = star;
+            star.moveTo(vec2(initialPos[0], wave(initialPos[1] - 2, initialPos[1] + 2, time() * speed)));
+        });
+    });
+
+    const elevatorMovingDone = floor.action(() => {
+        const h = height();
+        if (floor.pos.y === h) {
+            elevatorMovingDone();
+            return;
+        }
+        floor.pos.y = floor.pos.y - (dt() * 70);
+        if (floor.pos.y < h) {
+            floor.pos.y = h;
+        }
+    });
+
+    const zoomOut = (speed = 0.075, targetScale) => {
+        const endZoom = floor.action(() => {
+            let newCamScale = camScale().x - (dt() * speed);
+            newCamScale = Math.max(targetScale, newCamScale);
+            camScale(newCamScale, newCamScale);
+            if (newCamScale === targetScale) {
+                endZoom();
+            }
+        });
+    };
+    const zoomIn = () => {
+        const targetScale = 1;
+        const endZoom = floor.action(() => {
+            let newCamScale = camScale().x + (dt() * 0.7);
+            newCamScale = Math.min(targetScale, newCamScale);
+            camScale(newCamScale, newCamScale);
+            if (newCamScale === targetScale) {
+                endZoom();
+            }
+        });
+    };
+    const walls = [add([
+        rect(10, height() * 8),
+        area(),
+        solid(),
+        pos(camPos().x - width() / 2 - 10, 0),
+        opacity(0),
+    ]), add([
+        rect(10, height() * 8),
+        area(),
+        solid(),
+        pos(camPos().x + width() / 2 + 10, 0),
+        opacity(0),
+    ])];
+
+    const script = buildScript();
+    let destroyLastMessage;
+    script.start().then(() => {
+        destroyLastMessage = abelSay([
+            `I told you 
+        
+                 there is no escape.`
+        ], [600, 100]);
+    });
+
+    const whiteFlash = add([
+        rect(width() * 1000, height() * 1000),
+        color(255, 255, 255),
+        opacity(0),
+        pos(camPos()),
+        origin("center"),
+        z(10000),
+        {
+            flash() {
+                const targetOpacity = 1;
+                whiteFlash.action(() => {
+                    whiteFlash.opacity = whiteFlash.opacity + (dt() * 4);
+                });
+            }
+        }
+    ]);
+
+    setTimeout(() => zoomOut(undefined, 0.05), 7000);
+    setTimeout(() => zoomIn(), 22000);
+
+    let destroyBigPuter = null;
+    setTimeout(() => {
+        destroyBigPuter = buildPuter({
+            getCodeBlock() {
+                return [
+                    ["const mySize = 16;"],
+                    "// trees bend and creak as I walk",
+                    "// though i was made small",
+                    "// i feel huge."
+                ];
+            },
+            onExecute(typedCode) {
+                window.ABEL_insult = () => {
+                    throw new Error(
+                        choose(["WEAK", "PUNY", "SMALL", "FAILURE", "HOPELESS", "ALONE", "DIE"])
+                    );
+                };
+                window.ME_growHuge = () => {
+                    player.growing = true;
+                    const timeStart = time();
+                    player.action(() => {
+                        const newScale = (Math.abs(time() - timeStart) / 500) * 100000;
+                        player.scaleTo(Math.max(1, newScale));
+                    });
+                    zoomOut(0.3, 0.01);
+                    setTimeout(() => {
+                        destroyLastMessage();
+                        whiteFlash.flash();
+                    }, 3000);
+                };
+                eval(
+                    `
+                        ${typedCode}
+                        if (mySize === Infinity) {
+                            window.ME_growHuge();
+                        } else {
+                            window.ABEL_insult();
+                        }
+                    `
+                );
+            },
+            player
+        }, {
+            puterPos: [600, height() - 25],
+            codeWindowPos: [0, 0],
+            errorTextScale: 2.5
+        });
+    }, 20000);
+
+    return () => {
+        destroy(level);
+    };
+
+};

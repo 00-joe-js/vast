@@ -258,7 +258,7 @@ export default (player) => {
                 phase1Output.opacity = 1;
                 phase2Output.opacity = 1;
                 phase3Output.opacity = 1;
-                bossBattlePhase4();
+                bossBattlePhase1();
                 abel.color = rgb(0, 0, 0);
             }, 4000));
         }, 3000));
@@ -672,7 +672,6 @@ export default (player) => {
         };
 
         const checkAnswer = (whichPhase) => {
-            return true;
             return phaseAnswersFound[whichPhase] === phaseTrueAnswers[whichPhase];
         };
 
