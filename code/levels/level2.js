@@ -3,6 +3,7 @@ import buildPuter from "../puters";
 export default (player) => {
 
     player.spawnPoint = vec2(80, 275);
+    window.RESET_CAM();
 
     const cellWidth = window.LEVEL_CELL_WIDTH;
     const cellHeight = window.LEVEL_CELL_HEIGHT;

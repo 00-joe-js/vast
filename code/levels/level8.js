@@ -7,8 +7,7 @@ export default (player) => {
 
     window.BG_MUSIC.play();
     player.spawnPoint = vec2(100, 275);
-
-    camScale(1, 1);
+    window.RESET_CAM();
 
     let turnoffCamFollow = player.action(() => {
         camPos(player.pos);
@@ -130,13 +129,15 @@ export default (player) => {
     let walls;
 
     let noEscapePuter = null;
+    let escaping = false;
     const cleanStartPuter = buildPuter({
         getCodeBlock() {
             return [
-                ["const noEscape = true;"]
+                [!escaping ? "const noEscape = true;" : ""]
             ];
         },
         onExecute(typedCode) {
+            if (escaping) return;
             let answer = true;
             window.ABEL_noEscape = (theirAnswer) => {
                 answer = theirAnswer;
@@ -146,6 +147,7 @@ export default (player) => {
                 window.ABEL_noEscape(noEscape);
             `);
             if (answer !== false) return;
+            escaping = true;
             let scale = 1;
             let tilt = player.pos.y;
             const destTilt = tilt - 500;
@@ -164,7 +166,7 @@ export default (player) => {
                 }
                 if (scale === 0.5 && tilt === destTilt) {
                     clearInterval(camZoomOut);
-                    new Array(70).fill(null).map(() => createStar(true));
+                    new Array(30).fill(null).map(() => createStar(true));
                     timers.push(setTimeout(() => {
                         shake(10);
                         elevatorSpeed = 1000;
@@ -241,7 +243,6 @@ export default (player) => {
         elevatorSpeed = 0;
         abel.pos = vec2(2000, 475 - 500);
         abel.color = rgb(255, 0, 0);
-
         cleanStartPuter();
 
         const timers = [];
@@ -253,6 +254,7 @@ export default (player) => {
         timers.push(setTimeout(() => {
             const { destroy } = showDialogWindow(["I will not be left alone."], [550, 350]);
             timers.push(setTimeout(() => {
+
                 destroy();
                 bossMusic = play("bossMusic", { volume: 0.1, loop: true });
                 phase1Output.opacity = 1;
@@ -260,131 +262,134 @@ export default (player) => {
                 phase3Output.opacity = 1;
                 bossBattlePhase1();
                 abel.color = rgb(0, 0, 0);
+
+                let puter1LastTyped = `bar.color = "white";`;
+                phase1Puter.clean = buildPuter({
+                    getCodeBlock() {
+                        return [
+                            "// A mesh in the universe.",
+                            [puter1LastTyped],
+                            "if (bar.touches(star) && bar.color === star.color) {",
+                            `   destroy(star);`,
+                            "}"
+                        ];
+                    },
+                    onExecute(typedCode) {
+                        puter1LastTyped = typedCode;
+                        window.ABEL_receiveBarColor = (color) => {
+                            if (!color) barColor = "white";
+                            barColor = color;
+                        };
+                        eval(
+                            `
+                                const bar = {};
+                                bar.color = "white";
+                                ${typedCode}
+                                window.ABEL_receiveBarColor(bar.color);
+                            `
+                        );
+                    },
+                    onAction(p) {
+                        if (!phase1Puter.puter) phase1Puter.puter = p;
+                    },
+                    player
+                }, {
+                    puterPos: [1500, 475],
+                    codeWindowPos: [0, 0],
+                    errorTextScale: 2,
+                    orig: "center",
+                    areaScaleX: 5
+
+                });
+
+                let puter2LastTyped = `    setBlackHolePosition(0, 0);`
+                phase2Puter.clean = buildPuter({
+                    getCodeBlock() {
+                        return [
+                            "// Eater of stars.",
+                            "blackHole.x = 0;",
+                            "blackHole.y = 0;",
+                            "const setBlackHolePosition = (x, y) => {",
+                            "   blackHole.moveTo(x, y)",
+                            "};",
+                            "perSecond(nthSecond => { // 1, 2, 3, 4, and 5",
+                            [puter2LastTyped],
+                            "});"
+                        ];
+                    },
+                    onExecute(typedCode) {
+                        puter2LastTyped = typedCode;
+                        window.ABEL_setBlackHolePosAtSecond = (n, x, y) => {
+                            blackHolePositions[n].x = x;
+                            blackHolePositions[n].y = y;
+                        };
+                        eval(
+                            `
+                                for (let i = 1; i < 6; i++) {
+                                    const setBlackHolePosition = (x, y) => {
+                                        window.ABEL_setBlackHolePosAtSecond(i - 1, x, y);
+                                    };
+                                    const nthSecond = i;
+                                    ${typedCode}
+                                }
+                            `
+                        );
+                    },
+                    onAction(p) {
+                        if (!phase2Puter.puter) phase2Puter.puter = p;
+                    },
+                    player
+                }, {
+                    puterPos: [2000, 475],
+                    codeWindowPos: [0, 0],
+                    errorTextScale: 2,
+                    orig: "center",
+                    areaScaleX: 5
+                });
+
+                let puter3LastTyped = `const x = 0;`
+                phase3Puter.clean = buildPuter({
+                    getCodeBlock() {
+                        return [
+                            "// The universe is staggering.",
+                            "for (let i = 0; i < 7; i++) {",
+                            [puter3LastTyped],
+                            "const y = i * 100;",
+                            `   spawnPlatform(`,
+                            `      x`,
+                            `      y`,
+                            `   );`,
+                            "}",
+                        ];
+                    },
+                    onExecute(typedCode) {
+                        puter3LastTyped = typedCode;
+                        window.ABEL_setStaggeredPlatforms = (i, startX) => {
+                            platStartPositions[i] = startX;
+                        };
+                        eval(`
+                            for (let i = 0; i < 7; i++) {
+                                ${typedCode}
+                                window.ABEL_setStaggeredPlatforms(i, x);
+                            }
+                        `);
+                    },
+                    onAction(p) {
+                        if (!phase3Puter.puter) phase3Puter.puter = p;
+                    },
+                    player
+                }, {
+                    puterPos: [2500, 475],
+                    codeWindowPos: [0, 0],
+                    errorTextScale: 2,
+                    orig: "center",
+                    areaScaleX: 5
+                });
+
             }, 4000));
         }, 3000));
 
-        let puter1LastTyped = `bar.color = "white";`;
-        phase1Puter.clean = buildPuter({
-            getCodeBlock() {
-                return [
-                    "// A mesh in the universe.",
-                    [puter1LastTyped],
-                    "if (bar.touches(star) && bar.color === star.color) {",
-                    `   destroy(star);`,
-                    "}"
-                ];
-            },
-            onExecute(typedCode) {
-                puter1LastTyped = typedCode;
-                window.ABEL_receiveBarColor = (color) => {
-                    if (!color) barColor = "white";
-                    barColor = color;
-                };
-                eval(
-                    `
-                        const bar = {};
-                        bar.color = "white";
-                        ${typedCode}
-                        window.ABEL_receiveBarColor(bar.color);
-                    `
-                );
-            },
-            onAction(p) {
-                if (!phase1Puter.puter) phase1Puter.puter = p;
-            },
-            player
-        }, {
-            puterPos: [1500, 475],
-            codeWindowPos: [0, 0],
-            errorTextScale: 2,
-            orig: "center",
-            areaScaleX: 5
 
-        });
-
-        let puter2LastTyped = `    setBlackHolePosition(0, 0);`
-        phase2Puter.clean = buildPuter({
-            getCodeBlock() {
-                return [
-                    "// Eater of stars.",
-                    "blackHole.x = 0;",
-                    "blackHole.y = 0;",
-                    "const setBlackHolePosition = (x, y) => {",
-                    "   blackHole.moveTo(x, y)",
-                    "};",
-                    "perSecond(nthSecond => { // 1, 2, 3, 4, and 5",
-                    [puter2LastTyped],
-                    "});"
-                ];
-            },
-            onExecute(typedCode) {
-                puter2LastTyped = typedCode;
-                window.ABEL_setBlackHolePosAtSecond = (n, x, y) => {
-                    blackHolePositions[n].x = x;
-                    blackHolePositions[n].y = y;
-                };
-                eval(
-                    `
-                        for (let i = 1; i < 6; i++) {
-                            const setBlackHolePosition = (x, y) => {
-                                window.ABEL_setBlackHolePosAtSecond(i - 1, x, y);
-                            };
-                            const nthSecond = i;
-                            ${typedCode}
-                        }
-                    `
-                );
-            },
-            onAction(p) {
-                if (!phase2Puter.puter) phase2Puter.puter = p;
-            },
-            player
-        }, {
-            puterPos: [2000, 475],
-            codeWindowPos: [0, 0],
-            errorTextScale: 2,
-            orig: "center",
-            areaScaleX: 5
-        });
-
-        let puter3LastTyped = `const x = 0;`
-        phase3Puter.clean = buildPuter({
-            getCodeBlock() {
-                return [
-                    "// The universe is staggering.",
-                    "for (let i = 0; i < 7; i++) {",
-                    [puter3LastTyped],
-                    "const y = i * 100;",
-                    `   spawnPlatform(`,
-                    `      x`,
-                    `      y`,
-                    `   );`,
-                    "}",
-                ];
-            },
-            onExecute(typedCode) {
-                puter3LastTyped = typedCode;
-                window.ABEL_setStaggeredPlatforms = (i, startX) => {
-                    platStartPositions[i] = startX;
-                };
-                eval(`
-                    for (let i = 0; i < 7; i++) {
-                        ${typedCode}
-                        window.ABEL_setStaggeredPlatforms(i, x);
-                    }
-                `);
-            },
-            onAction(p) {
-                if (!phase3Puter.puter) phase3Puter.puter = p;
-            },
-            player
-        }, {
-            puterPos: [2500, 475],
-            codeWindowPos: [0, 0],
-            errorTextScale: 2,
-            orig: "center",
-            areaScaleX: 5
-        });
 
     };
 
@@ -417,7 +422,7 @@ export default (player) => {
         });
 
         phaseTrueAnswers[0] = 0;
-        const randomBlocks = new Array(randi(150, 250)).fill(null).map(() => {
+        const randomBlocks = new Array(randi(50, 100)).fill(null).map(() => {
             const isRed = chance(0.5);
             if (isRed) phaseTrueAnswers[0] = phaseTrueAnswers[0] + 1;
 
@@ -523,7 +528,7 @@ export default (player) => {
 
         });
 
-        const howMany = randi(100, 300);
+        const howMany = randi(50, 100);
         phaseTrueAnswers[1] = howMany;
         const randomBlocks = new Array(howMany).fill(null).map(() => {
             const initialPos = [randi(1200, 1200 + 1600), randi(100, -650)];
@@ -573,7 +578,7 @@ export default (player) => {
 
         const plannedTransition = setTimeout(() => {
             transitionToNextPhase();
-        }, 11000);
+        }, 10000);
 
         const unload = () => {
             clearTimeout(plannedTransition);
@@ -699,6 +704,15 @@ export default (player) => {
             } else {
                 setFail(phase3Output);
             }
+            if (successCount < 3) {
+                const dialogWindow = showDialogWindow(
+                    [choose(["remainingTime = Infinity;", "yourTimeWithMe = Infinity;", "prisonSentence = Infinity * Infinity;"])],
+                    [200, 500]
+                );
+                setTimeout(() => {
+                    dialogWindow.destroy();
+                }, 3000);
+            }
         }, 5000));
 
         timers.push(setTimeout(() => {
@@ -721,15 +735,24 @@ export default (player) => {
     };
 
     const cleanupBossLevel = () => {
-        destroy(level);
-        destroy(bossPlat);
-        destroy(abel);
+        const newDestroy = (v) => {
+            try {
+                destroy(v)
+            } catch (e) { }
+        }
+        newDestroy(level);
+        newDestroy(bossPlat);
+        newDestroy(abel);
         cleanStartPuter();
-        walls.forEach(destroy);
-        stars.forEach(destroy);
-        destroy(phase1Output);
-        destroy(phase2Output);
-        destroy(phase3Output);
+        if (walls) {
+            walls.forEach(newDestroy);
+        }
+        if (stars) {
+            stars.forEach(newDestroy);
+        }
+        newDestroy(phase1Output);
+        newDestroy(phase2Output);
+        newDestroy(phase3Output);
         if (typeof currentPhaseUnload === "function") {
             currentPhaseUnload();
         }

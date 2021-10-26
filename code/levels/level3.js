@@ -4,6 +4,7 @@ import createResetPuter from "../puters/reset";
 export default (player) => {
 
     player.spawnPoint = vec2(140, 0);
+    window.RESET_CAM();
 
     const cellWidth = window.LEVEL_CELL_WIDTH;
     const cellHeight = window.LEVEL_CELL_HEIGHT;
@@ -96,20 +97,7 @@ export default (player) => {
                 plat.speed = getDefaultPlatSpeed(i);
             });
         }
-    );
-
-    const initialJumpForce = player.jumpForce;
-    action(() => {
-        const curr = player.curPlatform();
-        if (curr?.is("movingPlat")) {
-            if (curr.speed >= 2000) {
-                player.jumpForce = -20;
-            }
-            player.moveTo(vec2(player.pos.x, -10), curr.speed + 10);
-        } else {
-            player.jumpForce = initialJumpForce;
-        }
-    });
+    );   
 
     const levelConfig = {
         width: cellWidth,
@@ -156,6 +144,19 @@ export default (player) => {
     ];
 
     const level = addLevel(levelMapString, levelConfig);
+
+    const initialJumpForce = player.jumpForce;
+    railedPlats[0].action(() => {
+        const curr = player.curPlatform();
+        if (curr?.is("movingPlat")) {
+            if (curr.speed >= 2000) {
+                player.jumpForce = -20;
+            }
+            player.moveTo(vec2(player.pos.x, -10), curr.speed + 10);
+        } else {
+            player.jumpForce = initialJumpForce;
+        }
+    });
 
     return () => {
         destroy(level);

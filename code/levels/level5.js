@@ -4,8 +4,9 @@ import shuffle from "shuffle-array";
 export default (player) => {
 
     player.spawnPoint = vec2(80, 0);
+    window.RESET_CAM();
 
-    setTimeout(() => {
+    const zoomingOut = setTimeout(() => {
         camScale(vec2(0.5, 0.5));
         camPos(vec2(width(), height()));
     }, 1500);
@@ -135,6 +136,7 @@ export default (player) => {
     );
 
     return () => {
+        clearTimeout(zoomingOut);
         destroy(floor);
         firstRow.forEach(destroy);
         grid.forEach(destroy);

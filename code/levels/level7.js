@@ -12,6 +12,7 @@ export default (player) => {
     player.phasing = true;
     const defaultVel = player.bodyOpts.maxVel;
     player.bodyOpts.maxVel = 0;
+    window.RESET_CAM();
 
     setTimeout(() => {
         player.crouching = false;
@@ -22,8 +23,6 @@ export default (player) => {
     const cellHeight = window.LEVEL_CELL_HEIGHT;
 
     setCameraPosScale([0, 0], [1, 1]);
-
-    player.weight = 0;
 
     const strip = add([
         rect(width() * 4, height() * 4),
@@ -78,7 +77,7 @@ export default (player) => {
 
     let stars = [];
     setTimeout(() => {
-        new Array(70).fill(null).map(() => createStar(true));
+        new Array(10).fill(null).map(() => createStar(true));
     }, 300);
 
     const prop = 84 / 115;
@@ -464,9 +463,17 @@ export default (player) => {
         if (window.BG_BACKUP) {
             window.BG_BACKUP.stop();
         }
-        preventCreateNewStars = true;
-        destroy(saviorPlat);
-        destroy(goal);
+        cleanupPuter();
+        preventCreateNewStars = true;    
+        player.weight = 1;
+        player.phasing = false;
+        player.bodyOpts.maxVel = defaultVel;
+        if (saviorPlat) {
+            destroy(saviorPlat);
+        }
+        if (goal) {
+            destroy(goal);
+        }
         destroy(strip);
         stars.forEach(destroy);
         player.bodyOpts.maxVel = defaultVel;

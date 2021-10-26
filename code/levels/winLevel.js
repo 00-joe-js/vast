@@ -30,7 +30,7 @@ const buildScript = () => {
         abelSay([
             ["this is the weight of the universe."],
             ["                          ... of everything AGAINST YOU"]
-        ], [700, 500], 6000);
+        ], [600, 500], 6000);
         await delay(3000);
         abelSay([
             "HOPELESS"
@@ -72,8 +72,8 @@ export default (player) => {
     }, (2 * 60 + 2) * 1000);
 
 
-    const stars = new Array(500).fill(null).map(() => {
-        const initialPos = [randi(width() * 5 * -1, width() * 5), randi(height() * 5 * -1, height() * 5)];
+    const stars = new Array(150).fill(null).map(() => {
+        const initialPos = [randi(width() * 2 * -1, width() * 2), randi(height() * 2 * -1, height() * 2)];
         const speed = randi(1, 5);
         const star = add([
             circle(1.2),
@@ -88,7 +88,6 @@ export default (player) => {
         return star;
     });
 
-
     const cellWidth = window.LEVEL_CELL_WIDTH;
     const cellHeight = window.LEVEL_CELL_HEIGHT;
 
@@ -99,13 +98,6 @@ export default (player) => {
         origin("center"),
         pos(camPos().x, height() + 100)
     ]);
-
-    floor.action(() => {
-        stars.forEach(star => {
-            const { initialPos, speed } = star;
-            star.moveTo(vec2(initialPos[0], wave(initialPos[1] - 2, initialPos[1] + 2, time() * speed)));
-        });
-    });
 
     const elevatorMovingDone = floor.action(() => {
         const h = height();
@@ -173,7 +165,6 @@ export default (player) => {
         z(10000),
         {
             flash() {
-                const targetOpacity = 1;
                 whiteFlash.action(() => {
                     whiteFlash.opacity = whiteFlash.opacity + (dt() * 4);
                 });
@@ -190,7 +181,7 @@ export default (player) => {
             getCodeBlock() {
                 return [
                     ["const mySize = 16;"],
-                    "// trees bend and creak as I walk",
+                    "// trees bend and creak as i walk",
                     "// though i was made small",
                     "// i feel huge."
                 ];
@@ -217,6 +208,9 @@ export default (player) => {
                         destroyLastMessage();
                         whiteFlash.flash();
                     }, 3000);
+                    setTimeout(() => {
+                        hasEnded();
+                    }, 7000);
                 };
                 eval(
                     `
@@ -239,6 +233,22 @@ export default (player) => {
             }
         });
     }, 20000);
+
+    const cleanupLevel = () => {
+        stars.forEach(destroy);
+        walls.forEach(destroy);
+        destroy(whiteFlash);
+        if (destroyBigPuter) {
+            destroyBigPuter();
+        }
+        if (destroyLastMessage) {
+            destroyLastMessage();
+        }
+    };
+
+    const hasEnded = () => {
+        cleanupLevel();
+    };
 
     return () => {
         destroy(level);

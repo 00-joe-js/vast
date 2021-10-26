@@ -30,7 +30,6 @@ const makeResetComputer = (puterPos, player, onReset) => {
 
     resetPuter.action(() => {
         if (resetPuter.isTouching(player)) {
-            console.log("touch");
             resetText.opacity = 1;
         } else {
             resetText.opacity = 0;

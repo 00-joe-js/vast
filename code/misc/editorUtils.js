@@ -57,7 +57,6 @@ const recreateCaretPosition = (preEle, caretPosition, selection, clonedRange) =>
         clonedRange.setStart(elementAtCaret, offset);
     } catch (e) {
         console.error(e);
-        console.log(elementAtCaret);
     }
 
     selection.addRange(clonedRange);

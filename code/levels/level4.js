@@ -4,11 +4,10 @@ import createResetPuter from "../puters/reset";
 export default (player) => {
 
     player.spawnPoint = vec2(80, -40);
+    window.RESET_CAM();
 
     const cellWidth = window.LEVEL_CELL_WIDTH;
     const cellHeight = window.LEVEL_CELL_HEIGHT;
-
-    const actions = [];
 
     const levelConfig = {
         width: cellWidth,
@@ -40,7 +39,7 @@ export default (player) => {
         origin("center"),
     ]);
 
-    const waveAction = action(() => {
+    strip.action(() => {
         strip.opacity = wave(0.4, 1, time() * 25);
     });
 
@@ -51,7 +50,7 @@ export default (player) => {
     let currentGravity = 0.15;
 
     let unloaded = false;
-    action(() => {
+    strip.action(() => {
         if (unloaded) {
             return;
         }
@@ -159,8 +158,6 @@ export default (player) => {
     );
 
     return () => {
-        // cancelGravAction();
-        // waveAction();
         destroy(level);
         destroy(strip);
         cleanupResetPuter();

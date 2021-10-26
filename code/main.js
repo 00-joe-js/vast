@@ -1,4 +1,3 @@
-window.l = console.log.bind(console);
 window.GAME_WIDTH = 1200;
 window.GAME_HEIGHT = 720;
 window.LEVEL_CELL_WIDTH = window.GAME_WIDTH / 20;
@@ -37,6 +36,17 @@ class LevelManager {
         this._spawnPlayer = spawnPlayerFunc;
     }
     _loadLevel() {
+        let minLevel = window.localStorage.getItem("reachedLevel")
+        if (minLevel) {
+           minLevel = parseInt(minLevel);
+           if (this.currentLevelIndex + 1 > minLevel && this.currentLevelIndex < 8) {
+               window.localStorage.setItem("reachedLevel", this.currentLevelIndex + 1);
+           } 
+        } else {
+            if (this.currentLevelIndex !== 0) {
+                window.localStorage.setItem("reachedLevel", this.currentLevelIndex + 1);
+            }
+        }
         if (this.unloadCurrentLevel) {
             this.unloadCurrentLevel();
         }
@@ -51,7 +61,7 @@ class LevelManager {
         this._loadLevel();
     }
     loadSpecificLevel(level) {
-        this.currentLevelIndex = level - 1;
+        this.currentLevelIndex = level;
         this._loadLevel();
     }
 }
@@ -60,14 +70,15 @@ class LevelManager {
 import kaboom from "kaboom";
 import load from "./load";
 
-const startGame = () => {
+const startGame = (specificLevel = null) => {
     document.querySelector("#title-card").remove();
     // initialize context
     kaboom({
         debug: true,
         background: [20, 20, 20],
         width: 1200,
-        height: 720
+        height: 720,
+        crisp: true,
     });
 
     load();
@@ -82,7 +93,6 @@ const startGame = () => {
             setCrouching(false);
         }, 750);
     };
-
 
     const player = add([
         sprite("player"),
@@ -149,10 +159,33 @@ const startGame = () => {
             window.BG_MUSIC = play("dangerouspath", { volume: 0.3, loop: true });
         }
 
-        lvlManager.loadNextLevel();
+        let camStartingPos = camPos().add(vec2(0, 0));
+        window.RESET_CAM = () => {
+            camPos(camStartingPos);
+            camScale(1, 1);
+        };
+
+        if (specificLevel) {
+            lvlManager.loadSpecificLevel(specificLevel);
+        } else {
+            lvlManager.loadNextLevel();
+        }
+        
         spawnPlayer();
 
         playerAnim("idle");
+
+        let showingControls = false;
+        keyPress("escape", () => {
+            const controls = document.querySelector("#controls");
+            if (!showingControls) {
+                showingControls = true;
+                controls.classList.add("show-in-game");
+            } else {
+                showingControls = false;
+                controls.classList.remove("show-in-game");
+            }
+        });
 
         keyPress("space", () => {
             if (player.grounded() && !player.crouching && !player.hitStun) {
@@ -206,9 +239,11 @@ const startGame = () => {
             player.color = rgb(255, 0, 0);
             shake(10);
             player.hitStun = true;
-            player.play("hit", {loop: false, onEnd: () => {
-                playerAnim("sit");
-            }});
+            player.play("hit", {
+                loop: false, onEnd: () => {
+                    playerAnim("sit");
+                }
+            });
             setTimeout(() => {
                 player.hitStun = false;
                 player.color = rgb(255, 255, 255);
@@ -280,4 +315,20 @@ const startGame = () => {
     });
 };
 
-document.querySelector("#play-button").addEventListener("click", startGame);
+document.querySelector("#play-button").addEventListener("click", () => startGame());
+
+let highestReachedLevel = window.localStorage.getItem("reachedLevel");
+
+if (highestReachedLevel) {
+    const buttonsContainer = document.querySelector("#load-level-buttons"); 
+    highestReachedLevel = parseInt(highestReachedLevel);
+    for (let i = 1; i < highestReachedLevel; i++) {
+        const button = document.createElement("span");
+        button.innerText = i + 1;
+        buttonsContainer.appendChild(
+            button
+        );
+        button.addEventListener("click", () => startGame(i));
+    }
+}
+

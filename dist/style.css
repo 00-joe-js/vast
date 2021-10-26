@@ -77,10 +77,12 @@ pre {
   outline: none;
 }
 
+
+
 #controls {
   position: fixed;
   right: 30px;
-  bottom: 40px;
+  bottom: 20px;
   color: white;
 }
 
@@ -90,4 +92,29 @@ pre {
 
 #controls span > span {
   font-weight: bold;
+}
+
+#controls.show-in-game {
+  right: 50vw;
+  bottom: 50vh;
+  background: black;
+  padding: 30px;
+}
+
+#load-level-buttons {
+  display: flex;
+  justify-content: center;
+}
+
+#load-level-buttons {
+  margin-top: 32px;
+  font-size: 32px;
+  font-family: 'Courier New', Courier, monospace;
+}
+
+#load-level-buttons span {
+  display: block;
+  color: white;
+  cursor: pointer;
+  margin: 0 10px;
 }
