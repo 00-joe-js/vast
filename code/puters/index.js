@@ -1,6 +1,6 @@
 import { activateEditorAndSetContent } from "../misc/editorUtils";
 
-const buildPuter = ({ getCodeBlock, onExecute, player, onAction = null }, { puterPos, areaScaleX = 3, areaScaleY = 1, codeWindowPos, orig = "left", autoOpen = false, errorTextScale = 1 }) => {
+const buildPuter = ({ getCodeBlock, onExecute, player, onAction = null }, { puterPos, areaScaleX = 3, areaScaleY = 1, codeWindowPos, orig = "left", autoOpen = false, errorTextScale = 1, getErrorTextPos }) => {
 
     const puter = add([
         pos(...puterPos),
@@ -16,11 +16,22 @@ const buildPuter = ({ getCodeBlock, onExecute, player, onAction = null }, { pute
     puter.on("ABEL_error", (err) => {
         play("computeError", { volume: 0.7 });
         shake(10);
+
+        const positionComponents = [];
+
+        if (typeof getErrorTextPos === "function") {
+            positionComponents.push(pos(...getErrorTextPos()));
+        } else {
+            positionComponents.push(
+                pos(),
+            );
+            positionComponents.push(follow(puter, vec2(0, -50)));
+        }
+
         add([
             color(255, 0, 0),
             text(err.message, { font: "sink", size: 16 }),
-            pos(),
-            follow(puter, vec2(0, -50)),
+            ...positionComponents,
             lifespan(5, { fade: 0.8 }),
             scale(errorTextScale)
         ]);

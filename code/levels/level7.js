@@ -10,6 +10,8 @@ export default (player) => {
 
     player.spawnPoint = vec2(0, 0);
     player.phasing = true;
+    const defaultVel = player.bodyOpts.maxVel;
+    player.bodyOpts.maxVel = 0;
 
     setTimeout(() => {
         player.crouching = false;
@@ -136,6 +138,11 @@ export default (player) => {
                         setTimeout(() => {
                             const d = activateEditorAndSetContent([`// Fine.`, [""]], () => { }, [width() / 2, 200]);
                             play("computeOpen", { volume: 0.15 });
+                            loadSound("endMusicBackup", "sounds/alone.mp3")
+                                .then(s => {
+                                    window.BG_BACKUP = play("endMusicBackup", { volume: 0.4, loop: true });
+                                })
+                                .catch(() => window.BG_MUSIC.play());
                             setTimeout(() => {
                                 d.deactivate();
                                 const de = activateEditorAndSetContent([`// I will show you where I am.`, [""]], () => { }, [width() / 3, 500]);
@@ -327,7 +334,6 @@ export default (player) => {
 
                     setTimeout(() => {
                         strip.color = rgb(100, 200, 200);
-                        window.BG_MUSIC.play();
                     }, 200);
                     playerMovingDir = vec2(-100, -100);
 
@@ -428,6 +434,8 @@ export default (player) => {
         destroy(abel);
         cleanupPuter();
         cancelStripFlash();
+        player.crouching = false;
+        player.bodyOpts.maxVel = defaultVel;
         strip.opacity = 0;
         camPos(0, -200);
         player.moveTo(0, -100);
@@ -453,11 +461,15 @@ export default (player) => {
     };
 
     return () => {
+        if (window.BG_BACKUP) {
+            window.BG_BACKUP.stop();
+        }
         preventCreateNewStars = true;
         destroy(saviorPlat);
         destroy(goal);
         destroy(strip);
         stars.forEach(destroy);
+        player.bodyOpts.maxVel = defaultVel;
     };
 
 };

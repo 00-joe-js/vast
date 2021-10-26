@@ -21,15 +21,15 @@ const abelSay = (content, pos, destroyAfter = null) => {
 
 
 const buildScript = () => {
-   
+
     const start = async () => {
         await delay(5000);
         abelSay(["You are an insignificant speck."],
             [600, 300], 5000);
         await delay(8000);
         abelSay([
-            ["this is the weight of the universe"],
-            ["                          of everything AGAINST YOU"]
+            ["this is the weight of the universe."],
+            ["                          ... of everything AGAINST YOU"]
         ], [700, 500], 6000);
         await delay(3000);
         abelSay([
@@ -67,7 +67,7 @@ export default (player) => {
 
     setTimeout(() => {
         loadSound("endMusicBackup", "sounds/alone.mp3")
-            .then(s => play("endMusicBackup", { volume: 0.5 }))
+            .then(s => play("endMusicBackup", { volume: 0.5, loop: true }))
             .catch(() => window.BG_MUSIC.play());
     }, (2 * 60 + 2) * 1000);
 
@@ -204,9 +204,13 @@ export default (player) => {
                 window.ME_growHuge = () => {
                     player.growing = true;
                     const timeStart = time();
+                    const camPosYStart = camPos().y;
                     player.action(() => {
-                        const newScale = (Math.abs(time() - timeStart) / 500) * 100000;
+                        const since = Math.abs(time() - timeStart)
+                        const newScale = (since / 500) * 100000;
                         player.scaleTo(Math.max(1, newScale));
+                        const cam = camPos();
+                        camPos(cam.x, cam.y + (since * 100) * -1);
                     });
                     zoomOut(0.3, 0.01);
                     setTimeout(() => {
@@ -229,7 +233,10 @@ export default (player) => {
         }, {
             puterPos: [600, height() - 25],
             codeWindowPos: [0, 0],
-            errorTextScale: 2.5
+            errorTextScale: 2.5,
+            getErrorTextPos() {
+                return [randi(50, 1100), randi(25, height() - 200)];
+            }
         });
     }, 20000);
 
