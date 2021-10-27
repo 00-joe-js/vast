@@ -158,6 +158,8 @@ const startGame = (specificLevel = null) => {
             window.BG_MUSIC = play("dangerouspath", { volume: 0.3, loop: true });
         }
 
+        focus();
+
         let camStartingPos = camPos().add(vec2(0, 0));
         window.RESET_CAM = () => {
             camPos(camStartingPos);
