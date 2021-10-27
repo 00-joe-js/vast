@@ -248,6 +248,8 @@ export default (player) => {
 
     const hasEnded = () => {
         cleanupLevel();
+        canvas.style.display = "none";
+        document.querySelector("#credits-card").style.display = "block";
     };
 
     return () => {

@@ -66,7 +66,6 @@ class LevelManager {
     }
 }
 
-
 import kaboom from "kaboom";
 import load from "./load";
 
@@ -75,7 +74,7 @@ const startGame = (specificLevel = null) => {
     // initialize context
     kaboom({
         debug: true,
-        background: [20, 20, 20],
+        background: [0,0,0],
         width: 1200,
         height: 720,
         crisp: true,
@@ -331,4 +330,24 @@ if (highestReachedLevel) {
         button.addEventListener("click", () => startGame(i));
     }
 }
+
+let showingMain = true;
+const toggles = Array.from(document.querySelectorAll(".credits-title-toggle"));
+
+const titleCard = document.querySelector("#title-card");
+const creditsCard = document.querySelector("#title-credits-card");
+
+toggles.forEach(toggle => {
+    toggle.addEventListener("click", () => {
+        if (showingMain) {
+            titleCard.style.display = "none";
+            creditsCard.style.display = "block";
+            showingMain = false;
+        } else {
+            titleCard.style.display = "block";
+            creditsCard.style.display = "none";
+            showingMain = true;
+        }
+    });
+});
 

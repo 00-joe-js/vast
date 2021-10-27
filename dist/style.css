@@ -19,11 +19,80 @@ canvas {
   display: block;
 }
 
-#title-card {
+#title-card, #credits-card, #title-credits-card {
   width: 1200px;
   height: 700px;
   background: black;
   position: relative;
+  color: white;
+}
+
+#title-card {
+  display: block;
+}
+
+#credits-card {
+  display: none;
+}
+
+#title-credits-card {
+  display: none;
+}
+
+.credits-title-toggle {
+  cursor: pointer;
+}
+
+#title-card .credits-title-toggle {
+  font-size: 24px;
+  position: absolute;
+  bottom: 12px;
+  left: 12px;
+}
+
+#credits-card {
+  font-family: 'Courier New', Courier, monospace;
+}
+
+#credits-text {
+  padding: 40px 30px;
+  position: relative;
+  z-index: 2;
+}
+
+#credits-text h2 {
+  font-size: 32px;
+  margin-bottom: 35px;
+  font-weight: 200;
+}
+
+#credits-text p {
+  margin-top: 20px;
+  font-size: 28px;
+}
+
+#attribution {
+  font-size: 18px;
+  margin-left: 30px;
+  position: relative;
+  z-index: 2;
+}
+
+#attribution ul {
+  margin-top: 10px;
+}
+
+#attribution ul li {
+  margin-top: 5px;
+}
+
+#bean-gif {
+  width: 800px;
+  opacity: 0.3;
+  position: absolute;
+  bottom: 0;
+  right: 0;
+  z-index: 0;
 }
 
 #logo, #play-button {

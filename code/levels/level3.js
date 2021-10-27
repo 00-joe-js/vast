@@ -54,7 +54,7 @@ export default (player) => {
                     "// I see ... you know a bit about this.",
                     `const platforms = [${getSpeedObjs()}];`,
                     [lastTyped],
-                    `// ctrl+enter for new line, but it's kinda broken.`
+                    `// ctrl+enter for new line`
                 ];
             },
             onExecute: (typedCode) => {

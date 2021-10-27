@@ -1,5 +1,6 @@
 export default () => {
 
+  loadSprite("bean", "sprites/bean.png");
     // PLAYER SPRITE.
     // Thank you: https://deadrevolver.itch.io/pixel-prototype-player-sprites
     loadSprite("player", "sprites/player.png", {
