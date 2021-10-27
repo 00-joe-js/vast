@@ -122,15 +122,15 @@ export default (player) => {
                 }
                 if (notMoving) {
                     timeNotMoving += dt();
-                    if (!yelledMove && timeNotMoving > 5) {
+                    if (!yelledMove && timeNotMoving > 3) {
                         yelledMove = true;
                         thePuter.trigger("ABEL_error", new Error("I SAID MOVE."));
                     }
-                    if (yelledMove && timeNotMoving > 10 && timeNotMoving < 11) {
+                    if (yelledMove && timeNotMoving > 7 && timeNotMoving < 8) {
                         thePuter.trigger("ABEL_error", new Error("EXPLORE THE VASTNESS, \n\n\n\n\n\tOR DIE."));
                         abel.opacity = 0.013;
                     }
-                    if (timeNotMoving > 15) {
+                    if (timeNotMoving > 10) {
                         if (yelledMoveAgain) return;
                         yelledMoveAgain = true;
                         window.BG_MUSIC.stop();
