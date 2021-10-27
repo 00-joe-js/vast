@@ -200,8 +200,8 @@ export default (player) => {
     const abel = add([
         sprite("abel", { frame: 0, width: abelHeight * prop, height: abelHeight }),
         pos(0, 0),
-        opacity(0.1),
-        color(0, 0, 0),
+        opacity(0.15),
+        color(10, 10, 10),
         origin("center"),
         z(-3)
     ]);
@@ -261,7 +261,7 @@ export default (player) => {
                 phase2Output.opacity = 1;
                 phase3Output.opacity = 1;
                 bossBattlePhase1();
-                abel.color = rgb(0, 0, 0);
+                abel.color = rgb(30, 30, 30);
 
                 let puter1LastTyped = `bar.color = "white";`;
                 phase1Puter.clean = buildPuter({
@@ -724,7 +724,7 @@ export default (player) => {
                 reset(phase2Output);
                 reset(phase3Output);
                 abel.opacity = 0.05;
-                abel.color = rgb(10, 10, 10);
+                abel.color = rgb(30, 30, 30);
                 bossBattlePhase1();
             }
         }, 6500));
