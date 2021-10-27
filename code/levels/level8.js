@@ -368,9 +368,10 @@ export default (player) => {
                             platStartPositions[i] = startX;
                         };
                         eval(`
-                            for (let i = 0; i < 7; i++) {
+                            for (let a_plat = 0; a_plat < 7; a_plat++) {
+                                const i = a_plat;
                                 ${typedCode}
-                                window.ABEL_setStaggeredPlatforms(i, x);
+                                window.ABEL_setStaggeredPlatforms(a_plat, x);
                             }
                         `);
                     },
