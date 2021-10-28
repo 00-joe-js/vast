@@ -108,6 +108,22 @@ export default (player) => {
         ]);
     });
 
+    const greenGuide = add([
+        text("z", { size: 50, font: "sink" }),
+        pos(portals[0].pos.x + 120, portals[0].pos.y + 20),
+        origin("center"),
+    ]);
+    const magentaGuide = add([
+        text("x", { size: 50, font: "sink" }),
+        pos(portals[1].pos.x - 120, portals[1].pos.y + 20),
+        origin("center"),
+    ]);
+    const tealGuide = add([
+        text("y", { size: 50, font: "sink" }),
+        pos(portals[2].pos.x - 120, portals[2].pos.y + 20),
+        origin("center"),
+    ]);
+
     upStrip.action(() => {
         const t = time();
         upStrip.opacity = wave(0.4, 1, t * 25);
@@ -189,22 +205,22 @@ export default (player) => {
             return [
                 `// A spear, plunging through space and time.`,
                 `const destinations = [${["moon", "sun", "stars"].map(shuffleWord).map(s => `"${s}"`).join(", ")}];`,
-                `const portals = { magenta: "sun",  teal: "moon", green: "sun" };`,
+                `const portals = { x: "sun",  y: "moon", z: "sun" };`,
                 [portalLastTyped],
-                `freeze(portals.magenta, portals.teal);`
+                `freeze(portals.x, portals.y);`
             ];
         },
         onExecute: (typedCode) => {
             portalLastTyped = typedCode;
             window.ABEL_connectPortals = (portalsObj) => {
-                if (portalsObj.magenta !== "sun" || portalsObj.teal !== "moon") {
+                if (portalsObj.x !== "sun" || portalsObj.y !== "moon") {
                     throw new Error("SOME DESTINATIONS ARE FATED.");
                 }
-                portals[0].connectionPortal = wordToIndex[portalsObj.green] || undefined;
+                portals[0].connectionPortal = wordToIndex[portalsObj.z] || undefined;
             };
             eval(
                 `
-                    const portals = { magenta: "sun",  teal: "moon", green: "sun" };
+                    const portals = { x: "sun",  y: "moon", z: "sun" };
                     ${typedCode}
                     window.ABEL_connectPortals(portals);
                 `
