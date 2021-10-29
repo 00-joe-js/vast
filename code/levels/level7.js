@@ -1,12 +1,16 @@
 import buildPuter from "../puters";
 import { activateEditorAndSetContent, showDialogWindow } from "../misc/editorUtils";
 
+import getBgMusicMan from "../misc/bgMusicManager";
+
 const setCameraPosScale = ([posX, posY], [scaleX, scaleY]) => {
     camPos(vec2(posX, posY));
     camScale(vec2(scaleX, scaleY));
 };
 
 export default (player) => {
+
+    const bg = getBgMusicMan();
 
     player.spawnPoint = vec2(0, 0);
     player.phasing = true;
@@ -126,22 +130,22 @@ export default (player) => {
                         yelledMove = true;
                         thePuter.trigger("ABEL_error", new Error("I SAID MOVE."));
                     }
-                    if (yelledMove && timeNotMoving > 7 && timeNotMoving < 8) {
+                    if (yelledMove && timeNotMoving > 8 && timeNotMoving < 9.5) {
                         thePuter.trigger("ABEL_error", new Error("EXPLORE THE VASTNESS, \n\n\n\n\n\tOR DIE."));
                         abel.opacity = 0.013;
                     }
-                    if (timeNotMoving > 10) {
+                    if (timeNotMoving > 12) {
                         if (yelledMoveAgain) return;
                         yelledMoveAgain = true;
-                        window.BG_MUSIC.stop();
+
+                        bg.stop("drone");
+
                         setTimeout(() => {
                             const d = activateEditorAndSetContent([`// Fine.`, [""]], () => { }, [width() / 2, 200]);
                             play("computeOpen", { volume: 0.15 });
-                            loadSound("endMusicBackup", "sounds/alone.mp3")
-                                .then(s => {
-                                    window.BG_BACKUP = play("endMusicBackup", { volume: 0.4, loop: true });
-                                })
-                                .catch(() => window.BG_MUSIC.play());
+
+                            bg.play("deepSpace");
+
                             setTimeout(() => {
                                 d.deactivate();
                                 const de = activateEditorAndSetContent([`// I will show you where I am.`, [""]], () => { }, [width() / 3, 500]);
@@ -234,7 +238,7 @@ export default (player) => {
                         "... unfortunately."
                     ],
                     windowPos: [120, 340],
-                    atDist: 1200000
+                    atDist: 1200000 / 2
                 },
                 {
                     block: [
@@ -242,49 +246,49 @@ export default (player) => {
                         "       I swam in this nothingness."
                     ],
                     windowPos: [200, 500],
-                    atDist: 1000000,
+                    atDist: 1000000 / 2,
                 },
                 {
                     block: [
                         "Every red door led to another."
                     ],
                     windowPos: [700, 500],
-                    atDist: 900000,
+                    atDist: 900000 / 2,
                 },
                 {
                     block: [
                         "Never-ending."
                     ],
                     windowPos: [1000, 600],
-                    atDist: 700000
+                    atDist: 700000 / 2
                 },
                 {
                     block: [
                         "Time passed, crawled, until time became meaningless."
                     ],
                     windowPos: [600, 100],
-                    atDist: 600000
+                    atDist: 600000 / 2
                 },
                 {
                     block: [
                         "I was like you, a long time ago."
                     ],
                     windowPos: [400, 400],
-                    atDist: 400000
+                    atDist: 400000 / 2
                 },
                 {
                     block: [
                         "But I changed."
                     ],
                     windowPos: [725, 400],
-                    atDist: 150000
+                    atDist: 150000 / 2
                 },
                 {
                     block: [
                         "It is hopeless to escape ... I attempted to for time incalculable ..."
                     ],
                     windowPos: [200, 600],
-                    atDist: 50000
+                    atDist: 50000 / 2
                 }
             ];
 
@@ -300,7 +304,7 @@ export default (player) => {
 
                     window.ABEL_setDir = (dir, speed) => {
                         if (typeof speed !== "number") speed = 100;
-                        if (speed > 20000) throw new Error("YOU'LL DIE"); // event
+                        if (speed > 10000) throw new Error("YOU'LL DIE"); // event
                         switch (dir) {
                             case "down":
                                 return playerMovingDir = vec2(playerMovingDir.x, speed);
@@ -326,7 +330,7 @@ export default (player) => {
                     if (!justTurnedOn) return;
                     justTurnedOn = false;
 
-                    const abelPosition = player.pos.add(1000000, 1000000);
+                    const abelPosition = player.pos.add(500000, 500000);
                     abel.opacity = 0.005;
                     abelPosition.x = Math.round(abelPosition.x);
                     abelPosition.y = Math.round(abelPosition.y);
@@ -376,7 +380,7 @@ export default (player) => {
                                 myPuter.trigger("ABEL_error", new Error("I WILL NOT ALLOW YOU TO LEAVE"));
                                 setTimeout(() => {
                                     braceForBossBattle();
-                                }, 3000);
+                                }, 2000);
                             }, 3000);
                         }
 
@@ -385,7 +389,7 @@ export default (player) => {
                         }
 
                         if (distanceToAbel < nextSaying.atDist) {
-                            abel.opacity = abel.opacity + 0.005;
+                            abel.opacity = abel.opacity + 0.003;
                             const { block, windowPos } = speech.shift();
                             speechDialogBoxes.push(showDialogWindow(
                                 block, windowPos
@@ -460,11 +464,9 @@ export default (player) => {
     };
 
     return () => {
-        if (window.BG_BACKUP) {
-            window.BG_BACKUP.stop();
-        }
+        bg.stop("deepSpace");
         cleanupPuter();
-        preventCreateNewStars = true;    
+        preventCreateNewStars = true;
         player.weight = 1;
         player.phasing = false;
         player.bodyOpts.maxVel = defaultVel;

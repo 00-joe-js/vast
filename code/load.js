@@ -50,10 +50,6 @@ export default () => {
     });
 
     loadSprite("abel", "sprites/abel.png");
-  
-    // BG MUSIC
-    // Thanks: https://joshuuu.itch.io/short-loopable-background-music
-    loadSound("dangerouspath", "sounds/Dangerous Path.wav");
 
     loadSound("computeOpen", "sounds/compute.wav");
     loadSound("computeError", "sounds/error.wav");

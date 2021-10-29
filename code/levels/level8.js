@@ -1,13 +1,18 @@
 import buildPuter from "../puters";
 import { showDialogWindow } from "../misc/editorUtils";
+import { resetCameraInterface } from "../misc/levelStartUtils";
+import getBgMusicMan from "../misc/bgMusicManager";
 
 import loadWinLevel from "./winLevel";
 
 export default (player) => {
 
-    window.BG_MUSIC.play();
+    const bgMusic = getBgMusicMan();
+
+    bgMusic.play("drone");
+
     player.spawnPoint = vec2(100, 275);
-    window.RESET_CAM();
+    resetCameraInterface.reset();
 
     let turnoffCamFollow = player.action(() => {
         camPos(player.pos);
@@ -16,7 +21,6 @@ export default (player) => {
     const cellWidth = window.LEVEL_CELL_WIDTH;
     const cellHeight = window.LEVEL_CELL_HEIGHT;
 
-    let bossMusic = null;
     let currentPhaseUnload = null;
     let unloads = [];
 
@@ -238,7 +242,7 @@ export default (player) => {
         player.spawnPoint = vec2(1950, 275);
         player.bossFight = true;
         noEscapePuter.trigger("ABEL_error", new Error("NO"));
-        window.BG_MUSIC.stop();
+        bgMusic.stop();
         shake(100);
         elevatorSpeed = 0;
         abel.pos = vec2(2000, 475 - 500);
@@ -256,7 +260,7 @@ export default (player) => {
             timers.push(setTimeout(() => {
 
                 destroy();
-                bossMusic = play("bossMusic", { volume: 0.1, loop: true });
+                bgMusic.play("bossMusic");
                 phase1Output.opacity = 1;
                 phase2Output.opacity = 1;
                 phase3Output.opacity = 1;
@@ -764,9 +768,9 @@ export default (player) => {
     };
 
     const win = () => {
-        bossMusic.stop();
+        bgMusic.stop("bossMusic");
         setTimeout(() => {
-            window.BG_MUSIC.play();
+            bgMusic.play("drone");
             elevatorSpeed = 1000;
             shake(10);
             play("elevator", { volume: 0.1 });

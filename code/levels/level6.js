@@ -293,6 +293,9 @@ export default (player) => {
     const level = addLevel(levelMapString, levelConfig);
 
     return () => {
+        destroy(tealGuide);
+        destroy(magentaGuide);
+        destroy(greenGuide);
         destroy(level);
         destroy(floor);
         cleanupThrustPuter();

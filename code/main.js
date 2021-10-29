@@ -69,6 +69,9 @@ class LevelManager {
 import kaboom from "kaboom";
 import load from "./load";
 
+import { resetCameraInterface } from "./misc/levelStartUtils";
+import getBgMusicMan from "./misc/bgMusicManager";
+
 const startGame = (specificLevel = null) => {
     document.querySelector("#title-card").remove();
     // initialize context
@@ -154,16 +157,19 @@ const startGame = (specificLevel = null) => {
 
     ready(() => {
 
-        if (PLAY_MUSIC) {
-            window.BG_MUSIC = play("dangerouspath", { volume: 0.3, loop: true });
-        }
+        const bgMusic = getBgMusicMan();
+        bgMusic.play("drone");
+
+        // if (PLAY_MUSIC) {
+        //     window.BG_MUSIC = play("dangerouspath", { volume: 0.3, loop: true });
+        // }
 
         focus();
 
         let camStartingPos = camPos().add(vec2(0, 0));
+        resetCameraInterface.setDefaultPos(camStartingPos);
         window.RESET_CAM = () => {
-            camPos(camStartingPos);
-            camScale(1, 1);
+            resetCameraInterface.reset();
         };
 
         if (specificLevel) {

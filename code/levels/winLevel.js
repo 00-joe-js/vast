@@ -1,4 +1,5 @@
 import { showDialogWindow } from "../misc/editorUtils";
+import getBgMusicMan from "../misc/bgMusicManager";
 import buildPuter from "../puters"
 
 const delay = (n) => {
@@ -53,6 +54,7 @@ const buildScript = () => {
 
 export default (player) => {
 
+    
     player.bossFight = true;
     camScale(1, 1);
     camPos(600, 360);
@@ -60,17 +62,14 @@ export default (player) => {
     player.spawnPoint = vec2(80, height() + 75);
     player.spawnPlayer();
 
-    window.BG_MUSIC.stop();
-    loadSound("endMusic", "sounds/anormal.mp3")
-        .then(s => play("endMusic", { volume: 0.5 }))
-        .catch(() => window.BG_MUSIC.play());
+    const bg = getBgMusicMan();
+    bg.stop("drone");
+
+    bg.play("endMusic");
 
     setTimeout(() => {
-        loadSound("endMusicBackup", "sounds/alone.mp3")
-            .then(s => play("endMusicBackup", { volume: 0.5, loop: true }))
-            .catch(() => window.BG_MUSIC.play());
+        bg.play("deepSpace");
     }, (2 * 60 + 2) * 1000);
-
 
     const stars = new Array(150).fill(null).map(() => {
         const initialPos = [randi(width() * 2 * -1, width() * 2), randi(height() * 2 * -1, height() * 2)];

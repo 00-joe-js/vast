@@ -1,9 +1,10 @@
 import buildPuter from "../puters";
+import { resetCameraInterface } from "../misc/levelStartUtils";
 
 export default (player) => {
 
     player.spawnPoint = vec2(80, 275);
-    window.RESET_CAM();
+    resetCameraInterface.reset();
 
     const cellWidth = window.LEVEL_CELL_WIDTH;
     const cellHeight = window.LEVEL_CELL_HEIGHT;
