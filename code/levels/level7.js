@@ -32,7 +32,7 @@ export default (player) => {
         rect(width() * 4, height() * 4),
         pos(0, 0),
         color(0, 255, 255),
-        opacity(0.2),
+        opacity(0.1),
         area(),
         origin("center"),
         follow(player)
@@ -40,7 +40,6 @@ export default (player) => {
 
     let playerMovingDir = vec2(0, 100);
     const cancelStripFlash = strip.action(() => {
-        strip.opacity = wave(0.2, 0.3, time() * 10);
         camPos(player.pos);
         player.move(playerMovingDir);
     });
