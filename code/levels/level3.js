@@ -47,7 +47,7 @@ export default (player) => {
         return railedPlats.map(plat => `{ speed: ${plat.speed} }`).join(", ");
     };
 
-    let lastTyped = "";
+    let lastTyped = `platforms[1].speed = ${railedPlats[1].speed};`;
     const cleanupPuter = buildPuter(
         {
             getCodeBlock: () => {
