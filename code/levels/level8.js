@@ -157,7 +157,7 @@ export default (player) => {
             turnoffCamFollow();
             const timers = [];
             walls = createElevatorWalls();
-            const stopZoomOut = loop(0.05, () => {
+            const stopZoomOut = loop(0.02, () => {
                 scale = scale - dt();
                 if (scale <= 0.5) {
                     scale = 0.5;
@@ -554,10 +554,10 @@ export default (player) => {
                 }
                 if (block.isTouching(blackHole)) {
                     touchingBlackHole = true;
-                    setTimeout(() => {
+                    wait(0.5,  () => {
                         phase2Output.text = parseInt(phase2Output.text) + 1;
                         block.destroy();
-                    }, 500);
+                    });
                 }
                 if (block.fall === true) {
                     block.pos.y = block.pos.y + (dt() * 500);
@@ -575,9 +575,9 @@ export default (player) => {
             return block;
         });
 
-        setTimeout(() => {
+        wait(7.5, () => {
             randomBlocks.forEach(block => block.fall = true);
-        }, 7500);
+        });
 
         const plannedTransition = setTimeout(() => {
             transitionToNextPhase();
