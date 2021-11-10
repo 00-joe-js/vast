@@ -20,7 +20,6 @@ const abelSay = (content, pos, destroyAfter = null) => {
     return destroy;
 };
 
-
 const buildScript = () => {
 
     const start = async () => {
@@ -54,7 +53,6 @@ const buildScript = () => {
 
 export default (player) => {
 
-    
     player.bossFight = true;
     camScale(1, 1);
     camPos(600, 360);

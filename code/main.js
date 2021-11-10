@@ -36,10 +36,10 @@ class LevelManager {
     _loadLevel() {
         let minLevel = window.localStorage.getItem("reachedLevel")
         if (minLevel) {
-           minLevel = parseInt(minLevel);
-           if (this.currentLevelIndex + 1 > minLevel && this.currentLevelIndex < 8) {
-               window.localStorage.setItem("reachedLevel", this.currentLevelIndex + 1);
-           } 
+            minLevel = parseInt(minLevel);
+            if (this.currentLevelIndex + 1 > minLevel && this.currentLevelIndex < 8) {
+                window.localStorage.setItem("reachedLevel", this.currentLevelIndex + 1);
+            }
         } else {
             if (this.currentLevelIndex !== 0) {
                 window.localStorage.setItem("reachedLevel", this.currentLevelIndex + 1);
@@ -76,7 +76,7 @@ const startGame = (specificLevel = null) => {
 
     kaboom({
         debug: true,
-        background: [0,0,0],
+        background: [0, 0, 0],
         width: 1200,
         height: 720,
         crisp: true,
@@ -172,7 +172,7 @@ const startGame = (specificLevel = null) => {
         } else {
             lvlManager.loadNextLevel();
         }
-        
+
         spawnPlayer();
 
         playerAnim("idle");
@@ -322,7 +322,7 @@ document.querySelector("#play-button").addEventListener("click", () => startGame
 let highestReachedLevel = window.localStorage.getItem("reachedLevel");
 
 if (highestReachedLevel) {
-    const buttonsContainer = document.querySelector("#load-level-buttons"); 
+    const buttonsContainer = document.querySelector("#load-level-buttons");
     highestReachedLevel = parseInt(highestReachedLevel);
     for (let i = 1; i < highestReachedLevel; i++) {
         const button = document.createElement("span");

@@ -4,7 +4,7 @@ import { resetCameraInterface } from "../misc/levelStartUtils";
 
 export default (player) => {
 
-    player.spawnPoint = vec2(140, 0);  
+    player.spawnPoint = vec2(140, 0);
     resetCameraInterface.reset();
 
     const cellWidth = window.LEVEL_CELL_WIDTH;
