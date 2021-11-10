@@ -3,8 +3,6 @@ window.GAME_HEIGHT = 720;
 window.LEVEL_CELL_WIDTH = window.GAME_WIDTH / 20;
 window.LEVEL_CELL_HEIGHT = window.GAME_HEIGHT / 20;
 
-const PLAY_MUSIC = true;
-
 import loadLevel1 from "./levels/level1";
 import loadLevel2 from "./levels/level2";
 import loadLevel3 from "./levels/level3";
@@ -73,8 +71,9 @@ import { resetCameraInterface } from "./misc/levelStartUtils";
 import getBgMusicMan from "./misc/bgMusicManager";
 
 const startGame = (specificLevel = null) => {
+
     document.querySelector("#title-card").remove();
-    // initialize context
+
     kaboom({
         debug: true,
         background: [0,0,0],
@@ -159,10 +158,6 @@ const startGame = (specificLevel = null) => {
 
         const bgMusic = getBgMusicMan();
         bgMusic.play("drone");
-
-        // if (PLAY_MUSIC) {
-        //     window.BG_MUSIC = play("dangerouspath", { volume: 0.3, loop: true });
-        // }
 
         focus();
 

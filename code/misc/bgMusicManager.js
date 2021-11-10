@@ -1,28 +1,3 @@
-// loadSound("dangerouspath", "sounds/Dangerous Path.wav");
-// loadSound("bossMusic", "sounds/battle.wav");
-
-/*
-    window.BG_MUSIC.stop();
-    loadSound("endMusic", "sounds/anormal.mp3")
-        .then(s => play("endMusic", { volume: 0.5 }))
-        .catch(() => window.BG_MUSIC.play());
-
-    setTimeout(() => {
-        loadSound("endMusicBackup", "sounds/alone.mp3")
-            .then(s => play("endMusicBackup", { volume: 0.5, loop: true }))
-            .catch(() => window.BG_MUSIC.play());
-*/
-
-/*
-
- loadSound("endMusicBackup", "sounds/alone.mp3")
-                                .then(s => {
-                                    window.BG_BACKUP = play("endMusicBackup", { volume: 0.4, loop: true });
-                                })
-                                .catch(() => window.BG_MUSIC.play());
-
-*/
-
 class BgMusic {
 
     static PLAY_MUSIC = true;
@@ -74,8 +49,6 @@ class BgMusic {
     }
 
     async play(songName) {
-
-        console.log(songName);
 
         if (this.currentlyPlayingName === songName) {
             return;

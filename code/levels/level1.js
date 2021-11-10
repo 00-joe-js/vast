@@ -1,4 +1,4 @@
-import {resetCameraInterface} from "../misc/levelStartUtils";
+import { resetCameraInterface } from "../misc/levelStartUtils";
 
 export default (player) => {
 
