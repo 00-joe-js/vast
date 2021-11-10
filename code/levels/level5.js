@@ -51,7 +51,7 @@ export default (player) => {
     let amountPlats = 30;
     let disableRate = 100;
     const runCalculations = () => {
-        return setInterval(() => {
+        return loop(disableRate / 1000, () => {
             grid.forEach(cell => {
                 cell.opacity = 1;
                 cell.solid = true;
@@ -61,7 +61,7 @@ export default (player) => {
                 cell.solid = false;
                 cell.opacity = 0.1;
             });
-        }, disableRate);
+        });
     };
 
     let runningCalculations = runCalculations();
@@ -114,7 +114,7 @@ export default (player) => {
                     }
                     disableRate = newRate;
                     amountPlats = newAmount;
-                    clearInterval(runningCalculations);
+                    if (runningCalculations) runningCalculations();
                     runningCalculations = runCalculations();
                 };
 
@@ -141,7 +141,9 @@ export default (player) => {
         firstRow.forEach(destroy);
         grid.forEach(destroy);
         cleanupPuter();
-        clearInterval(runningCalculations);
+        if (runningCalculations) {
+            runningCalculations();
+        }
         destroy(goal);
     };
 

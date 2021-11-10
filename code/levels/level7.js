@@ -14,14 +14,16 @@ export default (player) => {
 
     player.spawnPoint = vec2(0, 0);
     player.phasing = true;
+
     const defaultVel = player.bodyOpts.maxVel;
     player.bodyOpts.maxVel = 0;
+
     window.RESET_CAM();
 
-    setTimeout(() => {
+    wait(0.8, () => {
         player.crouching = false;
         player.setAnim("idle");
-    }, 800);
+    });
 
     const cellWidth = window.LEVEL_CELL_WIDTH;
     const cellHeight = window.LEVEL_CELL_HEIGHT;
@@ -71,17 +73,15 @@ export default (player) => {
             cancelDestroyListener();
         });
         if (delay) {
-            setTimeout(() => {
-                star.opacity = 1;
-            }, randi(500, 5000));
+            wait(randi(500, 5000) / 1000, () => star.opacity = 1);
         }
         return star;
     };
 
     let stars = [];
-    setTimeout(() => {
+    wait(0.3, () => {
         new Array(10).fill(null).map(() => createStar(true));
-    }, 300);
+    });
 
     const prop = 84 / 115;
     const abelHeight = height();
@@ -139,31 +139,31 @@ export default (player) => {
 
                         bg.stop("drone");
 
-                        setTimeout(() => {
+                        wait(2, () => {
                             const d = activateEditorAndSetContent([`// Fine.`, [""]], () => { }, [width() / 2, 200]);
                             play("computeOpen", { volume: 0.15 });
 
                             bg.play("deepSpace");
 
-                            setTimeout(() => {
+                            wait(3, () => {
                                 d.deactivate();
                                 const de = activateEditorAndSetContent([`// I will show you where I am.`, [""]], () => { }, [width() / 3, 500]);
                                 play("computeOpen", { volume: 0.15 });
-                                setTimeout(() => {
+                                wait(3, () => {
                                     de.deactivate();
-                                    clearInterval(banterInterval);
+                                    stopIncrementingBanterIndex();
                                     test();
                                     currentPhase = 1;
-                                }, 3000);
-                            }, 3000);
-                        }, 2000);
+                                });
+                            });
+                        });
                     }
                 }
             });
 
-            const banterInterval = setInterval(() => {
+            const stopIncrementingBanterIndex = loop(7, () => {
                 banterPos++;
-            }, 7000);
+            });
 
             return {
                 getCodeBlock: () => {
@@ -334,9 +334,9 @@ export default (player) => {
                     abelPosition.x = Math.round(abelPosition.x);
                     abelPosition.y = Math.round(abelPosition.y);
 
-                    setTimeout(() => {
+                    wait(0.2, () => {
                         strip.color = rgb(100, 200, 200);
-                    }, 200);
+                    });
                     playerMovingDir = vec2(-100, -100);
 
                     const positionBlock = () => {
@@ -356,7 +356,7 @@ export default (player) => {
                         if (timeBlocked) return;
                         dialogBox.setContent(positionBlock());
                         timeBlocked = true;
-                        setTimeout(() => timeBlocked = false, 300);
+                        wait(0.3, () => timeBlocked = false);
                     };
 
                     const speechDialogBoxes = [];
@@ -370,17 +370,17 @@ export default (player) => {
 
                         if (!nextSaying && triggeredEnd === false) {
                             triggeredEnd = true;
-                            setTimeout(() => {
+                            wait(3, () => {
                                 playerMovingDir = vec2(0, 0);
                                 abel.opacity = 0.15;
                                 abel.color = rgb(50, 0, 0);
                                 dialogBox.destroy();
                                 speechDialogBoxes.forEach(v => v.destroy());
                                 myPuter.trigger("ABEL_error", new Error("I WILL NOT ALLOW YOU TO LEAVE"));
-                                setTimeout(() => {
+                                wait(2, () => {
                                     braceForBossBattle();
-                                }, 2000);
-                            }, 3000);
+                                });
+                            });
                         }
 
                         if (!nextSaying) {

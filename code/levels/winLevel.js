@@ -4,7 +4,7 @@ import buildPuter from "../puters"
 
 const delay = (n) => {
     return new Promise((r) => {
-        setTimeout(r, n);
+        wait(n / 1000, r);
     });
 };
 
@@ -13,9 +13,9 @@ const abelSay = (content, pos, destroyAfter = null) => {
         content, pos
     );
     if (destroyAfter) {
-        setTimeout(() => {
+        wait(destroyAfter / 1000, () => {
             destroy();
-        }, destroyAfter);
+        });
     }
     return destroy;
 };
@@ -65,9 +65,9 @@ export default (player) => {
 
     bg.play("endMusic");
 
-    setTimeout(() => {
+    wait((2 * 60 + 2), () => {
         bg.play("deepSpace");
-    }, (2 * 60 + 2) * 1000);
+    });
 
     const stars = new Array(150).fill(null).map(() => {
         const initialPos = [randi(width() * 2 * -1, width() * 2), randi(height() * 2 * -1, height() * 2)];
@@ -169,11 +169,11 @@ export default (player) => {
         }
     ]);
 
-    setTimeout(() => zoomOut(undefined, 0.05), 7000);
-    setTimeout(() => zoomIn(), 22000);
+    wait(7, () => zoomOut(undefined, 0.05));
+    wait(22, () => zoomIn());
 
     let destroyBigPuter = null;
-    setTimeout(() => {
+    wait(20, () => {
         destroyBigPuter = buildPuter({
             getCodeBlock() {
                 return [
@@ -201,13 +201,13 @@ export default (player) => {
                         camPos(cam.x, cam.y + (since * 100) * -1);
                     });
                     zoomOut(0.3, 0.01);
-                    setTimeout(() => {
+                    wait(3, () => {
                         destroyLastMessage();
                         whiteFlash.flash();
-                    }, 3000);
-                    setTimeout(() => {
+                    });
+                    wait(7, () => {
                         hasEnded();
-                    }, 7000);
+                    });
                 };
                 eval(
                     `
@@ -229,7 +229,7 @@ export default (player) => {
                 return [randi(50, 1100), randi(25, height() - 200)];
             }
         });
-    }, 20000);
+    });
 
     const cleanupLevel = () => {
         stars.forEach(destroy);

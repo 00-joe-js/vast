@@ -21,11 +21,11 @@ const makeResetComputer = (puterPos, player, onReset) => {
 
     const unlisten = player.on("computing", (computer) => {
         if (computer !== resetPuter) return;
-        setTimeout(() => {
+        wait(0.5, () => {
             onReset();
             play("reset", { volume: 0.2 });
             player.trigger("doneComputing");
-        }, 1000);
+        });
     });
 
     resetPuter.action(() => {
@@ -40,7 +40,7 @@ const makeResetComputer = (puterPos, player, onReset) => {
         unlisten();
         destroy(resetPuter);
         destroy(resetText);
-    }; 
+    };
 
 };
 

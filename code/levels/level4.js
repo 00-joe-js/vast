@@ -44,18 +44,19 @@ export default (player) => {
     });
 
     let alreadyTouching = false;
-    let degrade = null;
+    let cancelDegrade = null;
     const defaultVel = player.bodyOpts.maxVel;
 
     let currentGravity = 0.15;
 
     let unloaded = false;
     strip.action(() => {
+
         if (unloaded) {
             return;
         }
-        const isTouching = strip.isTouching(player);
 
+        const isTouching = strip.isTouching(player);
 
         if (isTouching) {
             if (alreadyTouching) return;
@@ -64,17 +65,17 @@ export default (player) => {
             const adjustedVel = gravity() * currentGravity;
             player.bodyOpts.maxVel = adjustedVel + 50;
             player.weight = currentGravity > 1 ? currentGravity : 1;
-            degrade = setInterval(() => {
+            cancelDegrade = loop(0.1, () => {
                 player.bodyOpts.maxVel = player.bodyOpts.maxVel - 10;
                 if (player.bodyOpts.maxVel <= adjustedVel) {
-                    player.bodyOpts.maxVel = adjustedVel
-                    clearInterval(degrade);
-                    degrade = null;
+                    player.bodyOpts.maxVel = adjustedVel;
+                    cancelDegrade();
+                    cancelDegrade = null;
                 }
-            }, 100);
+            });
         } else {
             if (!alreadyTouching) return;
-            clearInterval(degrade);
+            if (cancelDegrade) cancelDegrade();
             alreadyTouching = false;
             player.bodyOpts.maxVel = defaultVel;
             player.weight = 1;

@@ -1,6 +1,9 @@
 import { activateEditorAndSetContent } from "../misc/editorUtils";
 
-const buildPuter = ({ getCodeBlock, onExecute, player, onAction = null }, { puterPos, areaScaleX = 3, areaScaleY = 1, codeWindowPos, orig = "left", autoOpen = false, errorTextScale = 1, getErrorTextPos }) => {
+const buildPuter = (
+    { getCodeBlock, onExecute, player, onAction = null },
+    { puterPos, areaScaleX = 3, areaScaleY = 1, codeWindowPos, orig = "left", autoOpen = false, errorTextScale = 1, getErrorTextPos }
+) => {
 
     const puter = add([
         pos(...puterPos),

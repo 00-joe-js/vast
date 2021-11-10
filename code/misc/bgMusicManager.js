@@ -1,6 +1,6 @@
 class BgMusic {
 
-    static PLAY_MUSIC = true;
+    static PLAY_MUSIC = false;
     static SONGS = [
         "drone",
         "bossMusic",
@@ -66,7 +66,7 @@ class BgMusic {
         try {
             this.currentlyPlayingName = songName;
             await this._loadSong(songName, songConfig);
-            if (this.currentlyPlayingName !== songName) {
+            if (this.currentlyPlayingName !== songName) { // This may happen if another play is called before song is loaded.
                 stop(songName);
             } else {
                 this.currentlyPlaying = play(songName, { 

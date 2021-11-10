@@ -102,9 +102,7 @@ export default (player) => {
             cancelDestroyListener();
         });
         if (delay) {
-            setTimeout(() => {
-                star.opacity = 1;
-            }, randi(500, 5000));
+            wait(randi(500, 5000) / 1000, () => star.opacity = 1);
         }
         return star;
     };
@@ -159,7 +157,7 @@ export default (player) => {
             turnoffCamFollow();
             const timers = [];
             walls = createElevatorWalls();
-            const camZoomOut = setInterval(() => {
+            const stopZoomOut = loop(0.05, () => {
                 scale = scale - dt();
                 if (scale <= 0.5) {
                     scale = 0.5;
@@ -169,7 +167,7 @@ export default (player) => {
                     tilt = destTilt;
                 }
                 if (scale === 0.5 && tilt === destTilt) {
-                    clearInterval(camZoomOut);
+                    stopZoomOut();
                     new Array(30).fill(null).map(() => createStar(true));
                     timers.push(setTimeout(() => {
                         shake(10);
@@ -182,11 +180,11 @@ export default (player) => {
                 }
                 camScale(scale, scale);
                 camPos(2000, tilt);
-            }, 5);
+            });
             unloads.push(() => {
                 timers.forEach(clearTimeout);
                 destroy(walls);
-                clearInterval(camZoomOut);
+                stopZoomOut();
             });
         },
         onAction(p) {
@@ -769,31 +767,32 @@ export default (player) => {
 
     const win = () => {
         bgMusic.stop("bossMusic");
-        setTimeout(() => {
+        wait(0.5, () => {
             bgMusic.play("drone");
             elevatorSpeed = 1000;
             shake(10);
             play("elevator", { volume: 0.1 });
-            const fadingAbel = setInterval(() => {
+            const stopFadingAbel = loop(0.3, () => {
                 abel.opacity = abel.opacity - 0.025;
                 if (abel.opacity <= 0) {
-                    clearInterval(fadingAbel);
+                    stopFadingAbel();
                 }
             }, 300);
-            setTimeout(() => {
+            wait(4, () => {
                 const camDest = camPos().y + 1500;
-                const moveCam = setInterval(() => {
-                    camPos(camPos().x, camPos().y + (dt() * 500));
+                const stopMoveCam = loop(0.02, () => {
+                    const currentCamPos = camPos();
+                    camPos(currentCamPos.x, currentCamPos.y + (dt() * 500));
                     if (camPos().y >= camDest) {
-                        clearInterval(moveCam);
+                        stopMoveCam();
                     }
-                }, 20);
-                setTimeout(() => {
+                });
+                wait(5, () => {
                     cleanupBossLevel();
                     loadWinLevel(player);
-                }, 5000);
-            }, 5000);
-        }, 1000);
+                });
+            });
+        });
     };
 
     return cleanupBossLevel;
