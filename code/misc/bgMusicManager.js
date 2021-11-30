@@ -1,6 +1,6 @@
 class BgMusic {
 
-    static PLAY_MUSIC = false;
+    static PLAY_MUSIC = true;
     static SONGS = [
         "drone",
         "bossMusic",
