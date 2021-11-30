@@ -26,7 +26,7 @@ function buildGame() {
 			keepNames: true,
 			logLevel: "silent",
 			entryPoints: ["code/main.js"],
-			outfile: "dist/game.js",
+			outfile: "docs/game.js",
 		});
 
 	} catch (e) {
@@ -50,11 +50,11 @@ function buildGame() {
 			});
 		}
 		msg += "</pre>";
-		fs.writeFileSync("dist/index.html", msg);
+		fs.writeFileSync("docs/index.html", msg);
 		return;
 	}
 
-	fs.writeFileSync("dist/index.html", template);
+	fs.writeFileSync("docs/index.html", template);
 
 }
 
@@ -64,9 +64,9 @@ app.use(express.json({ strict: false }));
 app.get("/", (req, res) => {
 	err = null;
 	buildGame();
-	res.sendFile(__dirname + "/dist/index.html");
+	res.sendFile(__dirname + "/docs/index.html");
 });
 
-app.use(express.static("dist"));
+app.use(express.static("docs"));
 
 server.listen(port);
