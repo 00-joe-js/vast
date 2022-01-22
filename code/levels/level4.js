@@ -117,7 +117,7 @@ export default (player) => {
         },
         {
             puterPos: [cellWidth * 8, cellHeight * 16.5],
-            codeWindowPos: [500, 600],
+            codeWindowPos: [500, 400],
             areaScaleX: 3,
             orig: "center"
         }
