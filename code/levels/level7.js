@@ -40,7 +40,7 @@ export default (player) => {
         follow(player)
     ]);
 
-    let playerMovingDir = vec2(0, 100);
+    let playerMovingDir = vec2(200, 100);
     const cancelStripFlash = strip.action(() => {
         camPos(player.pos);
         player.move(playerMovingDir);
@@ -100,7 +100,7 @@ export default (player) => {
     const abelPhases = [
         (function () {
 
-            let lastTyped = `down(100);`;
+            let lastTyped = `down(100);\nright(200);`;
 
             let banterLines = [
                 "// Yes, go wherever you like.",
@@ -108,8 +108,12 @@ export default (player) => {
                 "// Swim through space, eternally.",
                 `swimWithMe("in this boundless world");`,
                 "// Swimming forever.",
-                "// #KAJAM2021",
-                "// Do not dare stop."
+                "// Do not dare stop.",
+                "// Keep swimming.",
+                "// Try higher numbers, any number you want.",
+                "// Keep swimming.",
+                "// Never stop.",
+                "swimTowards(Infinity);"
             ];
             let banterPos = 0;
 
@@ -131,7 +135,7 @@ export default (player) => {
                     }
                     if (yelledMove && timeNotMoving > 8 && timeNotMoving < 9.5) {
                         thePuter.trigger("ABEL_error", new Error("EXPLORE THE VASTNESS, \n\n\n\n\n\tOR DIE."));
-                        abel.opacity = 0.013;
+                        abel.opacity = 0.007;
                     }
                     if (timeNotMoving > 12) {
                         if (yelledMoveAgain) return;
@@ -175,13 +179,11 @@ export default (player) => {
                 },
                 onExecute: (typedCode) => {
 
-                    lastTyped = typedCode;
                     let settingVector = vec2(0, 0);
 
                     window.ABEL_setDir = (dir, speed) => {
-
                         if (typeof speed !== "number") speed = 100;
-                        if (speed > 20000) throw new Error("YOU'LL DIE"); // event
+                        if (speed > 10000) throw new Error("YOU'LL DIE"); // event
                         switch (dir) {
                             case "down":
                                 settingVector.y = speed;
@@ -196,7 +198,6 @@ export default (player) => {
                                 settingVector.x = speed;
                                 break;
                         }
-
                     };
 
                     eval(`
@@ -207,6 +208,7 @@ export default (player) => {
                         ${typedCode}
                     `);
 
+                    lastTyped = typedCode;
                     playerMovingDir = settingVector;
                     if (playerMovingDir.eq(vec2(0, 0))) {
                         notMoving = true;

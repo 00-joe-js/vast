@@ -169,7 +169,7 @@ export default (player) => {
         }
     ]);
 
-    wait(7, () => zoomOut(undefined, 0.05));
+    wait(7, () => zoomOut(undefined, 0.0001));
     wait(22, () => zoomIn());
 
     let destroyBigPuter = null;
@@ -192,7 +192,6 @@ export default (player) => {
                 window.ME_growHuge = () => {
                     player.growing = true;
                     const timeStart = time();
-                    const camPosYStart = camPos().y;
                     player.action(() => {
                         const since = Math.abs(time() - timeStart)
                         const newScale = (since / 500) * 100000;

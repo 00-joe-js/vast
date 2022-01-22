@@ -193,6 +193,7 @@ export default (player) => {
         },
         player
     }, {
+        codeWindowPos: [100, 100],
         puterPos: [2000, 475],
         errorTextScale: 10
     });

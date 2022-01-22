@@ -99,11 +99,26 @@ export default (player) => {
         }
     );
 
+    const controlHintBox = add([
+        rect(400, 100),
+        pos(0, 0),
+        area(),
+        opacity(0)
+    ]);
+
+    const useText = add([
+        text("Use:      E\n\nRun code: Enter", { font: "sink", size: 24 }),
+        color(255, 255, 255),
+        pos(200, 200)
+    ]);
+
+    controlHintBox.action(() => {
+        useText.opacity = controlHintBox.isTouching(player) ? 1 : 0;
+    });
 
     return () => {
-        destroy(level);
-        destroy(textObj);
         cleanupPuter();
+        [level, textObj, controlHintBox, useText].forEach(destroy);
     };
 
 };

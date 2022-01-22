@@ -12,7 +12,7 @@ class BgMusic {
         this._songs = {
             drone: {
                 url: "Dangerous Path.wav",
-                vol: 0.3,
+                vol: 0.1,
                 loadInitially: true
             },
             bossMusic: {

@@ -36,9 +36,7 @@ export default (startGame) => {
                 creditsCard.style.display = "block";
                 showingMain = false;
             } else {
-                titleCard.style.display = "block";
-                creditsCard.style.display = "none";
-                showingMain = true;
+                window.location.reload();
             }
         });
     });

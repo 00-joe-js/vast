@@ -147,10 +147,12 @@ pre {
 }
 
 #controls {
+  font-size: 1.5rem;
   position: fixed;
   right: 30px;
   bottom: 20px;
   color: white;
+  display: none;
 }
 
 #controls > span {
@@ -166,6 +168,7 @@ pre {
   bottom: 50vh;
   background: black;
   padding: 30px;
+  display: block;
 }
 
 #load-level-buttons {
